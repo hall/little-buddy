@@ -20,7 +20,7 @@ jobs:
       run: nix build
     - name: release
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
+      if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
       with:
-        prerelease: true
-        files: out/open_source/open_source.bin
+        prerelease: true # TODO: version things
+        files: result/little-buddy*.bin

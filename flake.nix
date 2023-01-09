@@ -6,16 +6,17 @@
 
   outputs = inputs@{ self, ... }:
     with inputs.utils.lib; eachSystem
+      # `gcc-arm-embedded-9` not supported on `aarch64-darwin`
       (with system; [
         x86_64-linux
         aarch64-linux
-        # `gcc-arm-embedded-9` not supported on `aarch64-darwin`
       ])
       (system:
         let pkgs = inputs.nixpkgs.legacyPackages.${system}; in
         {
-          packages.default = pkgs.stdenv.mkDerivation {
+          packages.default = pkgs.stdenv.mkDerivation rec {
             name = "little-buddy";
+            version = "0.0.0"; # TODO: get version from tags?
             src = ./.;
             makeFlags = [
               # "-j"
@@ -30,6 +31,10 @@
               flashrom
               minicom
             ];
+            installPhase = ''
+              mkdir -p $out
+              mv ./out/open_source/open_source.bin $out/${name}-${version}.bin
+            '';
           };
         });
 }
