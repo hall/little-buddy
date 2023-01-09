@@ -1,17 +1,28 @@
 # CONTRIBUTING
 
+This project uses the [nix](https://nixos.org/download.html) package manager.
+
+> **NOTE**: until they're no longer experimental, you'll need to [enable flakes](https://nixos.wiki/wiki/Flakes#Enable_flakes)
+
 ## build
+
+Enter a development environment with
 
 ```sh
 nix develop  # or use direnv or do the setup yourself, whatever
-nix build    # or `make -j T=open_source`
 ```
 
-where `T` is any directory under [`./config`](./config).
+Build the project with
+
+```sh
+nix build
+```
+
+The compiled `.bin` firmware will be in the `result/` directory.
 
 ## flash
 
-Flash both earbuds with [`bestool`](https://github.com/Ralim/bestool):
+Flash both earbuds:
 
     for i in 0 1; do bestool write-image --port /dev/ttyACM$i result/little-buddy-*.bin; done
 
