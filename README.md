@@ -2,7 +2,7 @@
 
 Firmware for the [PineBuds Pro](https://wiki.pine64.org/wiki/PineBuds_Pro). Hopefully.
 
-> **WARNING**: use at your own risk; this currently appears to be worse than the factory default
+> **WARNING**: use at your own risk; this is currently worse than the factory default
 
 ## attribution
 
