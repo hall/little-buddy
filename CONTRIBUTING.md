@@ -11,19 +11,15 @@ where `T` is any directory under [`./config`](./config).
 
 ## flash
 
-> **NOTE**: currently doesn't work, follow the Windows guide on the wiki instead
+Flash both earbuds with [`bestool`](https://github.com/Ralim/bestool):
 
-```sh
-flashrom -p pony_spi:dev=/dev/ttyACM0 -w out/open_source/open_source.bin
-```
+    for i in 0 1; do bestool write-image --port /dev/ttyACM$i result/little-buddy-*.bin; done
 
 ## logs
 
-> **NOTE**: also doesn't work; just prints garbage
+View logs over the serial port with
 
-```sh
-minicom -D /dev/ttyACM0
-```
+    minicom -D /dev/ttyACM0 -b 921600
 
 ## release
 
