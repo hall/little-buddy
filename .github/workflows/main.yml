@@ -22,7 +22,7 @@ jobs:
       id: bump
       if: github.ref == 'refs/heads/main'
       run: |
-        latest=$(git tag | sort -n | tail -1)
+        latest=$(git ls-remote --tags | cut -f3 -d/ | sort -n | tail -1)
         version=$(cat CHANGELOG.md | grep '^## \[[0-9]' | head -1 | cut -d "[" -f2 | cut -d "]" -f1)
         if [[ "$version" != "$latest" ]]; then
           git tag $version
