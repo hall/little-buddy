@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
 jobs:
-  build:
+  main:
     runs-on: ubuntu-latest
     steps:
     - name: checkout
@@ -18,9 +18,21 @@ jobs:
       run: nix flake check
     - name: build
       run: nix build
+    - name: bump
+      id: bump
+      if: github.ref == 'refs/heads/main'
+      run: |
+        latest=$(git tag | sort -n | tail -1)
+        version=$(cat CHANGELOG.md | grep '^## \[[0-9]' | head -1 | cut -d "[" -f2 | cut -d "]" -f1)
+        if [[ "$version" != "$latest" ]]; then
+          git tag $version
+          git push --tags -o ci.skip
+          echo version=$version >> $GITHUB_OUTPUT
+        fi
     - name: release
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+      if: steps.bump.outputs.version
       with:
-        prerelease: true # TODO: version things
+        prerelease: true # TODO: make conditional
         files: result/little-buddy*.bin
+        tag_name: ${{ steps.bump.outputs.version }}

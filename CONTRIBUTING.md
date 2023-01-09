@@ -25,6 +25,11 @@ flashrom -p pony_spi:dev=/dev/ttyACM0 -w out/open_source/open_source.bin
 minicom -D /dev/ttyACM0
 ```
 
+## release
+
+Create a new release by moving the "Unreleased" section in [`CHANGELOG.md`](./CHANGELOG.md) to a new version.
+Once pushed the [`main.yml`](./.github/workflows/main.yml) workflow will create a new release.
+
 ## notes
 
 > **NOTE**: upstream wrote this; leaving until I better understand

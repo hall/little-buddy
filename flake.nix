@@ -16,7 +16,6 @@
         {
           packages.default = pkgs.stdenv.mkDerivation rec {
             name = "little-buddy";
-            version = "0.0.0"; # TODO: get version from tags?
             src = ./.;
             makeFlags = [
               # "-j"
@@ -32,8 +31,10 @@
               minicom
             ];
             installPhase = ''
+              version=$(cat CHANGELOG.md | grep '^## \[[0-9]' | head -1 | cut -d "[" -f2 | cut -d "]" -f1)
+
               mkdir -p $out
-              mv ./out/open_source/open_source.bin $out/${name}-${version}.bin
+              mv ./out/open_source/open_source.bin $out/${name}-$version.bin
             '';
           };
         });
