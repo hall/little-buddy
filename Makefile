@@ -215,7 +215,7 @@ KBUILD_OUTPUT := $(shell ( if not exist $(KBUILD_OUTPUT)\ mkdir $(KBUILD_OUTPUT)
 KBUILD_OUTPUT := $(subst \,/,$(KBUILD_OUTPUT))
 else
 KBUILD_OUTPUT := $(shell mkdir -p $(KBUILD_OUTPUT) && cd $(KBUILD_OUTPUT) \
-                         && /bin/pwd)
+                         && pwd)
 endif
 
 $(if $(KBUILD_OUTPUT),, \
@@ -349,7 +349,7 @@ CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
 # SHELL used by kbuild
 ifneq ($(WIN_PLAT),y)
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
-          else if [ -x /bin/bash ]; then echo /bin/bash; \
+          else if [ -x bash ]; then echo bash; \
           else echo sh; fi ; fi)
 endif
 

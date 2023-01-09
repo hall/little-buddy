@@ -313,8 +313,8 @@ archive-cmd = ( ( echo create $@ && \
   echo save && \
   echo end ) | $(AR) -M )
 else
-# Command "/bin/echo -e" cannot work on Apple Mac machines, so we use "/usr/bin/printf" instead
-archive-cmd = ( /usr/bin/printf 'create $@\n\
+# Command "echo -e" cannot work on Apple Mac machines, so we use "printf" instead
+archive-cmd = ( printf 'create $@\n\
   addmod $(subst $(space),$(comma),$(strip $(filter-out %.a,$(1))))\n\
   $(foreach o,$(filter %.a,$(1)),addlib $o\n)save\nend' | $(AR) -M )
 endif
