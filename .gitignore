@@ -19,6 +19,7 @@
 !.gitattributes
 !.mailmap
 !.envrc
+!.github/
 
 # Backup files
 *~

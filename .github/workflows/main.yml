@@ -1,0 +1,22 @@
+name: Main
+on:
+  pull_request:
+  push:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+    - name: install nix
+      uses: cachix/install-nix-action@v18
+    - name: check
+      run: nix flake check
+    - name: build
+      run: nix build
+    - name: release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        prerelease: true
+        files: out/open_source/open_source.bin
