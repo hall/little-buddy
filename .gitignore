@@ -18,6 +18,7 @@
 !.gitignore
 !.gitattributes
 !.mailmap
+!.envrc
 
 # Backup files
 *~
