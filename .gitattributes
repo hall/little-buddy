@@ -1,0 +1,7 @@
+platform/drivers/usb/usb_dev/lib/libusbdev.a filter=lfs diff=lfs merge=lfs -text
+services/bt_if_enhanced/lib/ibrt_libbt_api_sbc_enc_2m_RTX.a filter=lfs diff=lfs merge=lfs -text
+services/bt_profiles_enhanced/lib/ibrt_libbt_profiles_sbc_enc_2m_RTX.a filter=lfs diff=lfs merge=lfs -text
+services/ibrt_core/lib/libtws_ibrt_enhanced_stack_anc_RTX.a filter=lfs diff=lfs merge=lfs -text
+services/ibrt_ui/lib/libtws_ibrt_enhanced_stack_RTX.a filter=lfs diff=lfs merge=lfs -text
+services/multimedia/lib/best2300p_libmultimedia_cp_anc.a filter=lfs diff=lfs merge=lfs -text
+utils/intersyshci/lib/libintersyshci_enhanced_stack_RTX.a filter=lfs diff=lfs merge=lfs -text

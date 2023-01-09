@@ -8,6 +8,10 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v3
+      with:
+        lfs: true
+    - name: lfs
+      run: git lfs checkout
     - name: install nix
       uses: cachix/install-nix-action@v18
     - name: check
