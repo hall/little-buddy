@@ -14,28 +14,52 @@
       (system:
         let pkgs = inputs.nixpkgs.legacyPackages.${system}; in
         {
-          packages.default = pkgs.stdenv.mkDerivation rec {
-            name = "little-buddy";
-            src = ./.;
-            makeFlags = [
-              # "-j"
-              "T=open_source"
-            ];
-            nativeBuildInputs = with pkgs; [
-              # https://github.com/NixOS/nixpkgs/issues/51907
-              gcc-arm-embedded-9
+          packages = {
+            bestool = pkgs.rustPlatform.buildRustPackage rec {
+              pname = "bestool";
+              version = "1921815e80e0f4fc4260d612590d8334c612e932";
+              src = pkgs.fetchFromGitHub
+                {
+                  owner = "Ralim";
+                  repo = pname;
+                  rev = version;
+                  sha256 = "sha256-xxCyA4swjdloLtTxmPQY3anz+Kc4XWRPZtlDsr/s5v8=";
+                  fetchSubmodules = true;
+                };
+              cargoSha256 = "sha256-NeXt3Sggxq8rEfMd16AHHYTzI0A9oRFhvp72A0TIEeA=";
+              sourceRoot = "source/${pname}";
+              nativeBuildInputs = with pkgs; [
+                pkg-config
+              ];
+              buildInputs = with pkgs;[
+                udev
+              ];
+            };
 
-              bc
-              hostname
-              flashrom
-              minicom
-            ];
-            installPhase = ''
-              version=$(cat CHANGELOG.md | grep '^## \[[0-9]' | head -1 | cut -d "[" -f2 | cut -d "]" -f1)
+            default = pkgs.stdenv.mkDerivation rec {
+              name = "little-buddy";
+              src = ./.;
+              makeFlags = [
+                # "-j"
+                "T=open_source"
+              ];
+              nativeBuildInputs = with pkgs; [
+                # https://github.com/NixOS/nixpkgs/issues/51907
+                gcc-arm-embedded-9
 
-              mkdir -p $out
-              mv ./out/open_source/open_source.bin $out/${name}-$version.bin
-            '';
+                bc
+                hostname
+                flashrom
+                minicom
+                self.packages.${system}.bestool
+              ];
+              installPhase = ''
+                version=$(cat CHANGELOG.md | grep '^## \[[0-9]' | head -1 | cut -d "[" -f2 | cut -d "]" -f1)
+
+                mkdir -p $out
+                mv ./out/open_source/open_source.bin $out/${name}-$version.bin
+              '';
+            };
           };
         });
 }
