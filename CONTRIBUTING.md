@@ -30,7 +30,7 @@ Flash both earbuds:
 
 View logs over the serial port with
 
-    minicom -D /dev/ttyACM0 -b 921600
+    minicom -D /dev/ttyACM0 -b 2000000
 
 ## release
 

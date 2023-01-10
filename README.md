@@ -4,6 +4,16 @@ Firmware for the [PineBuds Pro](https://wiki.pine64.org/wiki/PineBuds_Pro). Hope
 
 > **WARNING**: use at your own risk; this is currently worse than the factory default
 
+The following button taps/hold actions are currently mapped:
+
+| taps   | single bud     | left           | right       |
+| ------ | -------------- | -------------- | ----------- |
+| single | play/pause     | play/pause     | play/pause  |
+| double | next track     | previous track | next track  |
+| triple | volume up      | volume up      | volume down |
+| quad   | volume down    | ---            | ---         |
+| hold   | previous track | toggle anc     | toggle anc  |
+
 ## install
 
 Download the latest [release](https://github.com/hall/little-buddy/releases).
@@ -27,4 +37,4 @@ The upstream tarball was named "Little Whale" so I combined that with the device
 ### others
 
 You may also want to check out the [OpenPineBuds](https://github.com/pine64/OpenPineBuds) project which is more established (and likely by better stewards).
-This project takes some non-trivial inspiration from there.
+This project takes non-trivial inspiration from there.

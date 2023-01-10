@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.1.0] - 2023-01-09
+
+This release pulls in changes from [OpenPineBuds](https://github.com/pine64/OpenPineBuds).
+
+### Added
+
+- hold (~5s) button while in the case to force a reboot (so it can be programmed)
+- audio controls using the touch button on the buds (see README.md)
+
+### Changed
+
+- turn off LEDs and enter low-power state when battery is fully charged
+- use internal resistor to pick left/right instead of TWS master/slave pairing
+- pressing the button while in the case no longer triggers DFU mode
+- debugging baud rate raised to 2,000,000 to match stock firmware
+
+### Fixed
+
+- putting either bud into the case correctly switches to the other bud
+- don't register as an HID keyboard
+
 ## [0.0.0] - 2023-01-09
 
 ### Added
