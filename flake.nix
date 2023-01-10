@@ -39,10 +39,7 @@
             default = pkgs.stdenv.mkDerivation rec {
               name = "little-buddy";
               src = ./.;
-              makeFlags = [
-                # "-j"
-                "T=open_source"
-              ];
+              makeFlags = [ "-j" ];
               nativeBuildInputs = with pkgs; [
                 # https://github.com/NixOS/nixpkgs/issues/51907
                 gcc-arm-embedded-9
@@ -57,7 +54,7 @@
                 version=$(cat CHANGELOG.md | grep '^## \[[0-9]' | head -1 | cut -d "[" -f2 | cut -d "]" -f1)
 
                 mkdir -p $out
-                mv ./out/open_source/open_source.bin $out/${name}-$version.bin
+                mv ./out/firmware.bin $out/${name}-$version.bin
               '';
             };
           };

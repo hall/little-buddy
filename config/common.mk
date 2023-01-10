@@ -868,21 +868,7 @@ KBUILD_CPPFLAGS += -DRTOS
 KBUILD_CPPFLAGS += -DKERNEL_$(KERNEL)
 
 ifeq ($(KERNEL),RTX)
-KBUILD_CPPFLAGS += \
-	-Iinclude/rtos/rtx/
-KBUILD_CPPFLAGS += -D__RTX_CPU_STATISTICS__=1
-#KBUILD_CPPFLAGS += -DTASK_HUNG_CHECK_ENABLED=1
-else ifeq ($(KERNEL),RTX5)
-OS_IDLESTKSIZE ?= 1024
-KBUILD_CPPFLAGS += \
-	-Iinclude/rtos/rtx5/
-KBUILD_CPPFLAGS += -D__RTX_CPU_STATISTICS__=1
-#KBUILD_CPPFLAGS += -DTASK_HUNG_CHECK_ENABLED=1
-else #!rtx
-ifeq ($(KERNEL),FREERTOS)
-KBUILD_CPPFLAGS += \
-    -Iinclude/rtos/freertos/
-endif #freertos
+KBUILD_CPPFLAGS += -Iinclude/rtos/rtx/ -D__RTX_CPU_STATISTICS__=1
 endif #rtx
 
 ifeq ($(BLE),0)
@@ -2564,12 +2550,7 @@ ifneq ($(NO_BOOT_STRUCT),1)
 core-y += $(call add_if_exists,utils/boot_struct/)
 endif
 
-export DEFAULT_CFG_SRC ?= _default_cfg_src_
-
-ifneq ($(wildcard $(srctree)/config/$(T)/tgt_hardware.h $(srctree)/config/$(T)/res/),)
-KBUILD_CPPFLAGS += -Iconfig/$(T)
-endif
-KBUILD_CPPFLAGS += -Iconfig/$(DEFAULT_CFG_SRC)
+KBUILD_CPPFLAGS += -Iconfig
 
 CPU_CFLAGS := -mthumb
 ifeq ($(CPU),a7)

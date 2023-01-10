@@ -24,7 +24,7 @@ The compiled `.bin` firmware will be in the `result/` directory.
 
 Flash both earbuds:
 
-    for i in 0 1; do bestool write-image --port /dev/ttyACM$i result/little-buddy-*.bin; done
+    for i in 0 1; do bestool write-image --port /dev/ttyACM$i result/*.bin; done
 
 ## logs
 

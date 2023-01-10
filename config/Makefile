@@ -6,12 +6,12 @@ FILE_LIST := tgt_hardware.c
 
 ifneq ($(SLAVE_BIN_FLASH_OFFSET),)
 FILE_LIST += slave_code.S
-$(obj)/$(DEFAULT_CFG_SRC)/slave_code.o : out/$(SLAVE_BIN_TARGET_NAME)/$(SLAVE_BIN_TARGET_NAME).bin
+$(obj)/slave_code.o : out/$(SLAVE_BIN_TARGET_NAME)/$(SLAVE_BIN_TARGET_NAME).bin
 AFLAGS_slave_code.o += -DSLAVE_BIN_NAME=$(SLAVE_BIN_TARGET_NAME).bin -Iout/$(SLAVE_BIN_TARGET_NAME)
 endif
 
 obj-y := $(patsubst $(cur_dir)%,%,$(foreach f,$(FILE_LIST), \
-    $(if $(wildcard $(cur_dir)$(T)/$(f)),$(cur_dir)$(T)/$(f),$(cur_dir)$(DEFAULT_CFG_SRC)/$(f))))
+    $(if $(wildcard $(cur_dir)$(f)),$(cur_dir)$(f),$(cur_dir)$(f))))
 
 obj-y := $(obj-y:.c=.o)
 obj-y := $(obj-y:.cpp=.o)
@@ -28,7 +28,7 @@ ccflags-y += \
 	-Iservices/multimedia/audio/process/limiter/include
 
 ifeq ($(BT_DEV_NAME),)
-BT_DEV_NAME := $(T).$(BUILD_HOSTNAME).$(BUILD_USERNAME)
+BT_DEV_NAME := $(BUILD_HOSTNAME).$(BUILD_USERNAME)
 endif
 
 ccflags-y += -DBT_DEV_NAME=$(BT_DEV_NAME) $(CUST_TGT_FLAGS)

@@ -2,11 +2,7 @@ cur_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
 obj-y := $(patsubst $(cur_dir)%,%,$(wildcard $(cur_dir)*.c $(cur_dir)*.cpp $(cur_dir)*.S))
 
-ifneq ($(wildcard $(cur_dir)../../config/$(T)/app_status_ind.c),)
-obj-y += ../../config/$(T)/app_status_ind.c
-else
-obj-y += ../../config/$(DEFAULT_CFG_SRC)/app_status_ind.c
-endif
+obj-y += ../../config/app_status_ind.c
 
 obj-y := $(obj-y:.c=.o)
 obj-y := $(obj-y:.cpp=.o)

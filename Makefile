@@ -71,9 +71,7 @@ unexport GREP_OPTIONS
 
 # Check if just to show the help content
 ifeq ($(MAKECMDGOALS),help)
-ifeq ($(T),)
 HELP_TARGET := 1
-endif
 endif
 
 ifneq ($(HELP_TARGET),1)
@@ -149,7 +147,7 @@ endif
 
 export quiet Q KBUILD_VERBOSE
 
-TARGET_CFG_FILE = config/$(T)/target.mk
+TARGET_CFG_FILE = config/target.mk
 TARGET_COMMON_FILE = config/common.mk
 
 # To locate output files in a separate directory two syntaxes are supported.
@@ -180,22 +178,7 @@ ifeq ("$(origin O)","command line")
   KBUILD_OUTPUT := $(O)
 endif
 
-# Select target
-ifeq ($(CONFIG_SAVE_TARGET),y)
-ifeq ($(T),)
--include $(KBUILD_OUTPUT)/.config
-T := $(strip $(T))
-endif
-endif
-ifeq ($(T),)
-$(error Please specify the target in the command line: T=<targetName>)
-endif
-ifeq ($(wildcard $(TARGET_CFG_FILE)),)
-$(error Invalid target: T=$(T))
-endif
-export T
 
-KBUILD_OUTPUT := $(KBUILD_OUTPUT)/$(T)
 
 # That's our default target when none is given on the command line
 PHONY := _all
@@ -220,14 +203,6 @@ endif
 
 $(if $(KBUILD_OUTPUT),, \
      $(error failed to create output directory "$(saved-output)"))
-
-ifeq ($(CONFIG_SAVE_TARGET),y)
-ifeq ($(WIN_PLAT),y)
-_dummy := $(shell echo T := $(T)> $(KBUILD_OUTPUT)/../.config)
-else
-_dummy := $(shell echo "T := $(T)" > $(KBUILD_OUTPUT)/../.config)
-endif
-endif
 
 PHONY += $(MAKECMDGOALS) sub-make
 
@@ -529,11 +504,7 @@ endif
 
 # Generate REVISION_INFO (might be defined in target)
 ifeq ($(REVISION_INFO),)
-ifeq ($(CUST_TGT_INFO),)
-REVISION_INFO := $(GIT_REVISION):$(T)
-else
-REVISION_INFO := $(GIT_REVISION):$(CUST_TGT_INFO)
-endif
+REVISION_INFO := $(GIT_REVISION)
 endif
 
 include $(srctree)/scripts/include.mk
@@ -560,7 +531,7 @@ BUILD_USERNAME := $(subst $(space),-,$(strip $(BUILD_USERNAME)))
 # Default kernel image to build when no specific target is given.
 # IMAGE_FILE may be overruled on the command line or
 # set in the environment
-IMAGE_FILE ?= $(notdir $(T)).elf
+IMAGE_FILE ?= firmware.elf
 
 ifneq ($(filter .map .bin .hex .lst,$(suffix $(IMAGE_FILE))),)
 $(error Invalid IMAGE_FILE (conflicted suffix): $(IMAGE_FILE))
@@ -995,9 +966,6 @@ include scripts/include.mk
 endif
 
 help: FORCE
-	$(call echo-help,Mandatory options:)
-	$(call echo-help,  T=<targetBoard> - Select a target board configuration in config/)
-	$(call echo-help,)
 	$(call echo-help,Cleaning targets:)
 	$(call echo-help,  clean           - Remove most generated files)
 	$(call echo-help,  allclean        - Remove all generated files and the output directory if possible)
