@@ -868,7 +868,7 @@ KBUILD_CPPFLAGS += -DRTOS
 KBUILD_CPPFLAGS += -DKERNEL_$(KERNEL)
 
 ifeq ($(KERNEL),RTX)
-KBUILD_CPPFLAGS += -Iinclude/rtos/rtx/ -D__RTX_CPU_STATISTICS__=1
+KBUILD_CPPFLAGS += -Irtos/rtx/include -D__RTX_CPU_STATISTICS__=1
 endif #rtx
 
 ifeq ($(BLE),0)
