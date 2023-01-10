@@ -2,59 +2,8 @@
 CONFIG_CROSS_COMPILE := arm-none-eabi-
 CONFIG_STRICT_CFLAGS ?= y
 CONFIG_SAVE_TARGET ?= n
-CONFIG_FORCE_WIN_SHELL ?= y
 
-export CONFIG_STRICT_CFLAGS CONFIG_SAVE_TARGET CONFIG_FORCE_WIN_SHELL
-
-# ---------------------------------------------------------------------------
-# Platform and shell detection
-
-export WIN_PLAT := n
-ifeq ($(OS),Windows_NT)
-# Detect Cygwin
-ifneq ($(findstring /,$(PWD)),/)
-# also $(findstring /,$(HOME)) ?
-WIN_PLAT := y
-endif
-endif
-
-export WIN_SHELL := n
-ifeq ($(WIN_PLAT),y)
-ifeq ($(CONFIG_FORCE_WIN_SHELL),y)
-WIN_SHELL := y
-else
-# Detect Unix-style shell
-ifeq ($(shell echo $$0),$$0)
-WIN_SHELL := y
-endif
-endif
-endif
-
-BACKSLASH := \ # backslash
-BACKSLASH := $(strip $(BACKSLASH))
-
-TO_UNIX_PATH = $(subst $(BACKSLASH),/,$(1))
-TO_WIN_PATH = $(subst /,$(BACKSLASH),$(1))
-ESC_WIN_PATH = $(subst $(BACKSLASH),$(BACKSLASH)$(BACKSLASH),$(1))
-
-ifeq ($(WIN_PLAT),y)
-ifeq ($(WIN_SHELL),y)
-# make will choose sh.exe as SHELL if it finds sh.exe in the directories of PATH, regardless of
-# the setting in environment or parent (e.g., when git.exe is in the PATH)
-SHELL := cmd.exe
-SHELL_CMD = $(call TO_WIN_PATH,$(1))
-else
-SHELL_CMD = $(call ESC_WIN_PATH,$(call TO_WIN_PATH,$(1)))
-endif
-else
-SHELL_CMD = $(1)
-endif
-
-# The Unix-style path is recognized by compiler toolchain, GNU utilities and windows redirection
-# operators, but not by windows native commands (e.g., mkdir) and applications.
-
-# End of platform and shell detection
-# ---------------------------------------------------------------------------
+export CONFIG_STRICT_CFLAGS CONFIG_SAVE_TARGET
 
 # Do not use make's built-in rules and variables
 # (this increases performance and avoids hard-to-debug behaviour);
@@ -191,15 +140,8 @@ ifneq ($(KBUILD_OUTPUT),)
 # Invoke a second make in the output directory, passing relevant variables
 # check that the output directory actually exists
 saved-output := $(KBUILD_OUTPUT)
-ifeq ($(WIN_PLAT),y)
-KBUILD_OUTPUT := $(subst /,\,$(KBUILD_OUTPUT))
-KBUILD_OUTPUT := $(shell ( if not exist $(KBUILD_OUTPUT)\ mkdir $(KBUILD_OUTPUT) ) \
-                         && cd $(KBUILD_OUTPUT) && cd)
-KBUILD_OUTPUT := $(subst \,/,$(KBUILD_OUTPUT))
-else
 KBUILD_OUTPUT := $(shell mkdir -p $(KBUILD_OUTPUT) && cd $(KBUILD_OUTPUT) \
                          && pwd)
-endif
 
 $(if $(KBUILD_OUTPUT),, \
      $(error failed to create output directory "$(saved-output)"))
@@ -219,27 +161,15 @@ endif
 # Look for make include files relative to root of kernel src
 MAKEFLAGS += --include-dir=$(CURDIR)
 
-ifeq ($(WIN_PLAT),y)
-START_TIME := $(shell echo %time%)
-START_DATE_TIME := $(shell echo %date% %time%)
-else
 START_TIME := $(shell date +"%s.%N")
 START_DATE_TIME := $(shell date +"%Y-%m-%d %T.%N")
-endif
 
 sub-make: FORCE
 	@echo MAKE START: $(START_DATE_TIME)
 	$(Q)$(MAKE) -C $(KBUILD_OUTPUT) KBUILD_SRC=$(CURDIR) \
 		-f $(CURDIR)/Makefile $(filter-out _all sub-make,$(MAKECMDGOALS))
-ifeq ($(WIN_PLAT),y)
-	@echo MAKE END: %date% %time%
-ifneq ($(wildcard tools/timediff.bat),)
-	@tools/timediff.bat "%time%" "$(START_TIME)"
-endif
-else
 	@echo MAKE END: $$(date +"%Y-%m-%d %T.%N")
 	@printf "MAKE TIME: %.2f seconds\n" $$(echo "$$(date +%s.%N) - $(START_TIME)" | bc)
-endif
 
 # Leave processing to above invocation of make
 skip-makefile := 1
@@ -283,18 +213,10 @@ VPATH		:= $(srctree)
 export srctree objtree VPATH
 
 # Git revision
-ifeq ($(WIN_PLAT),y)
-GIT_REVISION := $(shell (where git >nul 2>&1) && (git rev-parse --short HEAD 2>nul))
-else
 GIT_REVISION := $(shell (which git >/dev/null 2>&1) && (git rev-parse --short HEAD 2>/dev/null))
-endif
 
 ifneq ($(GIT_REVISION),)
-ifeq ($(WIN_PLAT),y)
-GIT_REVISION := $(GIT_REVISION)$(shell (git diff --quiet && git diff --cached --quiet) >nul 2>&1 || echo -dirty)
-else
 GIT_REVISION := $(GIT_REVISION)$(shell (git diff --quiet && git diff --cached --quiet) >/dev/null 2>&1 || echo -dirty)
-endif
 endif
 
 
@@ -322,11 +244,9 @@ ARCH		?= arm
 CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
 
 # SHELL used by kbuild
-ifneq ($(WIN_PLAT),y)
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
           else if [ -x bash ]; then echo bash; \
           else echo sh; fi ; fi)
-endif
 
 # Make variables (CC, etc...)
 ifeq ($(TOOLCHAIN),armclang)
@@ -517,13 +437,8 @@ $(info REVISION_INFO: $(REVISION_INFO))
 $(info -------------------------------)
 
 # Build host and user info
-ifeq ($(WIN_PLAT),y)
-export BUILD_HOSTNAME := $(COMPUTERNAME)
-export BUILD_USERNAME := $(USERNAME)
-else
 export BUILD_HOSTNAME := $(shell hostname -s)
 export BUILD_USERNAME := $(shell id -un)
-endif
 
 BUILD_HOSTNAME := $(subst $(space),-,$(strip $(BUILD_HOSTNAME)))
 BUILD_USERNAME := $(subst $(space),-,$(strip $(BUILD_USERNAME)))
@@ -944,7 +859,6 @@ quiet_cmd_rmfiles = $(if $(wildcard $(rm-files)),CLEAN   $(wildcard $(rm-files))
 # $(Q)$(MAKE) $(clean)=dir
 clean := -f $(srctree)/scripts/clean.mk obj
 
-ifneq ($(WIN_PLAT),y)
 # Generate tags for editors
 # ---------------------------------------------------------------------------
 quiet_cmd_tags = GEN     $@
@@ -952,7 +866,6 @@ quiet_cmd_tags = GEN     $@
 
 tags TAGS cscope gtags: FORCE
 	$(call cmd,tags)
-endif
 
 HELP_TARGET := 2
 

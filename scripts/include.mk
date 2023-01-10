@@ -8,14 +8,6 @@ $(cur_makefile): ;
 ####
 # Generic definitions
 
-ifeq ($(WIN_PLAT),y)
-ifeq ($(WIN_SHELL),y)
-# make will choose sh.exe as SHELL if it finds sh.exe in the directories of PATH, regardless of
-# the setting in environment or parent (e.g., when git.exe is in the PATH)
-SHELL := cmd.exe
-endif
-endif
-
 # Convenient variables
 lparen	:= (
 rparen	:= )
@@ -25,20 +17,10 @@ squote  := '
 empty   :=
 space   := $(empty) $(empty)
 
-ifeq ($(WIN_PLAT),y)
-devnull := nul
-else
 devnull := /dev/null
-endif
 
 ###
 # Remove/copy commands
-ifeq ($(WIN_PLAT),y)
-CMDRMFILE	= del /f /q $(subst /,\,$1) >nul 2>&1
-CMDRMFILER	= cd $(subst /,\,$1) && del /f /q /s $(subst /,\,$2)
-CMDRMDIR	= rmdir /s /q $(subst /,\,$1) >nul 2>&1 || del /f /q /s $(subst /,\,$1)\*
-CMDCPFILE	= copy /y $(subst /,\,$1 $2)
-else
 CMDRMFILE	= rm -f $1
 CMDRMFILER	= find $1 $(RCS_FIND_IGNORE) \
 		   \( $(addprefix -name ,'$(firstword $2)') \
@@ -46,7 +28,6 @@ CMDRMFILER	= find $1 $(RCS_FIND_IGNORE) \
 		    -type f -print | xargs rm -f
 CMDRMDIR	= rm -fr $1
 CMDCPFILE	= cp -f $1 $2
-endif
 
 ###
 # Build-in obj suffix
@@ -75,44 +56,24 @@ basetarget = $(basename $(notdir $@))
 baseprereq = $(basename $(notdir $<))
 
 ###
-# Escape special characters for use in echo statements
-ifeq ($(WIN_PLAT),y)
-# Escape redirection character in echo in Windows
-escchar = $(subst $(lparen),^$(lparen),$(subst $(rparen),^$(rparen),$(subst &,^&,$(subst |,^|,$(subst <,^<,$(subst >,^>,$1))))))
-else
 # Escape single quote for use in echo statements
 escchar = $(subst $(squote),'\$(squote)',$1)
-endif
 
 ###
 # Easy method for doing a status message
        kecho := :
-ifeq ($(WIN_PLAT),y)
- quiet_kecho := echo.
-else
  quiet_kecho := echo
-endif
 silent_kecho := :
 kecho := $($(quiet)kecho)
 
-ifeq ($(WIN_PLAT),y)
-echo-help = @echo.  $(call escchar,$(1)) &
-else
 echo-help = @echo '  $(call escchar,$(1))'
-endif
 
 ###
 # try-run
-ifeq ($(WIN_PLAT),y)
-try-run = $(shell ($(1) >$(devnull) 2>&1) && echo. $(2) || echo. $(3))
-# Or, using define to construct multi-line WIN commands,
-# with if command: if not errorlevel 1
-else
 try-run = $(shell if ($(1)) >$(devnull) 2>&1; \
                   then echo "$(2)"; \
                   else echo "$(3)"; \
                   fi)
-endif
 
 ###
 # cc-option
@@ -130,30 +91,18 @@ build := -f $(srctree)/scripts/build.mk obj
 # skip if -I has no parameter
 #addtree = $(if $(patsubst -I%,%,$(1)), \
 #$(if $(filter-out -I/%,$(1)),$(patsubst -I%,-I$(srctree)/%,$(1))) $(1))
-ifeq ($(WIN_PLAT),y)
-addtree = $(if $(patsubst -I%,%,$(1)), \
-    $(if $(filter-out -I$(KBUILD_ROOT)/%,$(1)),$(patsubst -I%,-I$(srctree)/%,$(1)),$(1)))
-else
 addtree = $(if $(patsubst -I%,%,$(1)), \
     $(if $(filter-out -I/%,$(1)),$(patsubst -I%,-I$(srctree)/%,$(1)),$(1)))
-endif
 
 # Find all -I options and call addtree
 flags = $(foreach o,$($(1)),$(if $(filter -I%,$(o)),$(call addtree,$(o)),$(o)))
 
 # echo command.
 # Short version is used, if $(quiet) equals `quiet_', otherwise full one.
-ifeq ($(WIN_PLAT),y)
-echo-cmd = $(if $($(quiet)cmd_$(1)),\
-	echo.  $(call escchar,$($(quiet)cmd_$(1)))$(echo-why) &&)
-echo-cmd-nowhy = $(if $($(quiet)cmd_$(1)),\
-	echo.  $(call escchar,$($(quiet)cmd_$(1))) &&)
-else
 echo-cmd = $(if $($(quiet)cmd_$(1)),\
 	echo '  $(call escchar,$($(quiet)cmd_$(1)))$(echo-why)' ;)
 echo-cmd-nowhy = $(if $($(quiet)cmd_$(1)),\
 	echo '  $(call escchar,$($(quiet)cmd_$(1)))' ;)
-endif
 
 # printing commands
 cmd = @$(echo-cmd) $(cmd_$(1))
@@ -190,17 +139,8 @@ make-cmd = $(call escchar,$(subst \#,\\\#,$(subst $$,$$$$,$(cmd_$(1)))))
 # PHONY targets skipped in both cases.
 any-prereq = $(filter-out $(PHONY),$?) $(filter-out $(PHONY) $(wildcard $^),$^)
 
-ifeq ($(WIN_PLAT),y)
-depfile-new = echo. > $(depfile) && \
-              echo cmd_$@ := $(make-cmd) >> $(depfile) && \
-	      echo. >> $(depfile)
-depfile-add = echo. >> $(depfile) && \
-              echo cmd_$@ := $(make-cmd) >> $(depfile) && \
-	      echo. >> $(depfile)
-else
 depfile-new = printf '\n%s\n' 'cmd_$@ := $(make-cmd)' > $(depfile)
 depfile-add = printf '\n%s\n' 'cmd_$@ := $(make-cmd)' >> $(depfile)
-endif
 
 # Execute command if command has changed or prerequisite(s) are updated.
 #

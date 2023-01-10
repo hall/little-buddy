@@ -53,11 +53,7 @@ endif
 
 include scripts/lib.mk
 
-ifeq ($(WIN_PLAT),y)
-create_dir = if not exist $(subst /,\,$(1)) mkdir $(subst /,\,$(1))
-else
 create_dir = [ -d $(1) ] || mkdir -p $(1)
-endif
 
 ifneq ($(KBUILD_SRC),)
 # Create output directory if not already present
@@ -306,18 +302,10 @@ $(sort $(subdir-obj-y)): $(buildsubdir-y) ;
 ifeq ($(TOOLCHAIN),armclang)
 archive-cmd = $(AR) --create --debug_symbols $@ $(1)
 else
-ifeq ($(WIN_PLAT),y)
-archive-cmd = ( ( echo create $@ && \
-  echo addmod $(subst $(space),$(comma),$(strip $(filter-out %.a,$(1)))) && \
-  $(foreach o,$(filter %.a,$(1)),echo addlib $o && ) \
-  echo save && \
-  echo end ) | $(AR) -M )
-else
 # Command "echo -e" cannot work on Apple Mac machines, so we use "printf" instead
 archive-cmd = ( printf 'create $@\n\
   addmod $(subst $(space),$(comma),$(strip $(filter-out %.a,$(1))))\n\
   $(foreach o,$(filter %.a,$(1)),addlib $o\n)save\nend' | $(AR) -M )
-endif
 endif
 
 # Archive check

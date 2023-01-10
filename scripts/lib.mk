@@ -162,13 +162,7 @@ __a_flags	=                          $(call flags,_a_flags)
 __cpp_flags	=                          $(call flags,_cpp_flags)
 endif
 
-ifeq ($(WIN_PLAT),y)
-# Not to include system header files in dependency files,
-# for there are space characters in system path by default.
-depfile_flags  = -MMD -MP -MF $(depfile)
-else
 depfile_flags  = -MD -MP -MF $(depfile)
-endif
 
 c_flags        = $(depfile_flags) $(NOSTDINC_FLAGS) $(__c_flags)
 
