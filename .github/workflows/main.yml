@@ -6,33 +6,36 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-    - name: checkout
+
+    - name: checkout repo
       uses: actions/checkout@v3
       with:
         lfs: true
-    - name: lfs
+
+    - name: fetch lfs
       run: git lfs checkout
+
     - name: install nix
       uses: cachix/install-nix-action@v18
-    - name: check
+
+    - name: check flake
       run: nix flake check
-    - name: build
+
+    - name: build firmware
       run: nix build
-    - name: bump
-      id: bump
-      if: github.ref == 'refs/heads/main'
-      run: |
-        latest=$(git ls-remote --tags | cut -f3 -d/ | sort -n | tail -1)
-        version=$(cat CHANGELOG.md | grep '^## \[[0-9]' | head -1 | cut -d "[" -f2 | cut -d "]" -f1)
-        if [[ "$version" != "$latest" ]]; then
-          git tag $version
-          git push --tags -o ci.skip
-          echo version=$version >> $GITHUB_OUTPUT
-        fi
-    - name: release
+
+    - name: get latest tag
+      id: latest
+      run: echo ::set-output name=version::$(git describe --abbrev=0 --tags --match 'v[0-9]*\.[0-9]*\.[0-9]*' | cut -c2-)
+
+    - name: parse changelog
+      id: changelog
+      uses: coditory/changelog-parser@v1
+
+    - name: create release
       uses: softprops/action-gh-release@v1
-      if: steps.bump.outputs.version
+      if: github.ref == 'refs/heads/main' && steps.changelog.outputs.version != steps.latest.outputs.version
       with:
-        prerelease: true # TODO: make conditional
         files: result/little-buddy*.bin
-        tag_name: ${{ steps.bump.outputs.version }}
+        body: ${{ steps.changelog.outputs.description }}
+        tag_name: ${{ steps.changelog.outputs.version }}
