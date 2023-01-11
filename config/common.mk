@@ -806,18 +806,8 @@ SPECS_CFLAGS :=
 LIB_LDFLAGS := $(filter-out -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys,$(LIB_LDFLAGS))
 
 KBUILD_CPPFLAGS += -ffreestanding -Iutils/libc/inc
-ifeq ($(TOOLCHAIN),armclang)
-# 1) Avoid -nostdinc
-#    CMSIS header files need arm_compat.h, which is one of toolchain's standard header files
-# 2) Always -nostdlib for compiling C/C++ files
-#    Never convert standard API calls to non-standard library calls, but just emit standard API calls
-# 3) Avoid -nostdlib for linking final image
-#    Some 64-bit calculations and math functions need toolchain's standard library
-KBUILD_CPPFLAGS += -nostdlib
-else
 KBUILD_CPPFLAGS += -nostdinc
 CFLAGS_IMAGE += -nostdlib
-endif
 
 KBUILD_CPPFLAGS += -DNOSTD
 
@@ -827,13 +817,9 @@ ifeq ($(LIBC_ROM),1)
 core-y += utils/libc/
 endif
 
-ifeq ($(TOOLCHAIN),armclang)
-LIB_LDFLAGS := $(filter-out -lsupc++,$(LIB_LDFLAGS))
-else
 SPECS_CFLAGS := --specs=nano.specs
 
 LIB_LDFLAGS += -lm -lc -lgcc -lnosys
-endif
 
 endif # NOSTD != 1
 
@@ -967,11 +953,7 @@ KBUILD_CPPFLAGS	+= -U__INT32_TYPE__ -D__INT32_TYPE__=int -U__UINT32_TYPE__
 endif
 
 ifeq ($(MERGE_CONST),1)
-ifeq ($(TOOLCHAIN),armclang)
-$(error MERGE_CONST is not supported in $(TOOLCHAIN))
-else
 KBUILD_CPPFLAGS += -fmerge-constants -fmerge-all-constants
-endif
 endif
 
 export CORE_DUMP ?= 0
@@ -2594,12 +2576,10 @@ KBUILD_CPPFLAGS += -Werror
 endif
 
 ifeq ($(PIE),1)
-ifneq ($(TOOLCHAIN),armclang)
 ifneq ($(NOSTD),1)
 $(error PIE can only work when NOSTD=1)
 endif
 KBUILD_CPPFLAGS += -msingle-pic-base
-endif
 KBUILD_CPPFLAGS += -fPIE
 # -pie option will generate .dynamic section
 #LDFLAGS += -pie
@@ -2615,11 +2595,7 @@ CFLAGS_IMAGE += $(CPU_CFLAGS) $(SPECS_CFLAGS)
 #LDFLAGS += --sort-common --sort-section=alignment
 
 ifeq ($(CTYPE_PTR_DEF),1)
-ifeq ($(TOOLCHAIN),armclang)
-$(error CTYPE_PTR_DEF is not supported in $(TOOLCHAIN))
-else
 LDFLAGS_IMAGE += --defsym __ctype_ptr__=0
-endif
 endif
 
 export RAND_FROM_MIC ?= 0

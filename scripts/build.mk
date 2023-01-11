@@ -280,11 +280,7 @@ targets += $(MAKECMDGOALS) $(always)
 # ---------------------------------------------------------------------------
 
 quiet_cmd_dump_lst_o = MKLST   $@
-ifeq ($(TOOLCHAIN),armclang)
-      cmd_dump_lst_o = $(OBJDUMP) --datasymbols --text -c -d --interleave=source --output=$@ $<
-else
       cmd_dump_lst_o = $(OBJDUMP) -Sdlxr $< > $@
-endif
 
 lst-cmd = @$(call echo-cmd,dump_lst_o) $(cmd_dump_lst_o)
 
@@ -299,14 +295,10 @@ $(sort $(subdir-obj-y)): $(buildsubdir-y) ;
 
 # Archive command
 
-ifeq ($(TOOLCHAIN),armclang)
-archive-cmd = $(AR) --create --debug_symbols $@ $(1)
-else
 # Command "echo -e" cannot work on Apple Mac machines, so we use "printf" instead
 archive-cmd = ( printf 'create $@\n\
   addmod $(subst $(space),$(comma),$(strip $(filter-out %.a,$(1))))\n\
   $(foreach o,$(filter %.a,$(1)),addlib $o\n)save\nend' | $(AR) -M )
-endif
 
 # Archive check
 
@@ -386,15 +378,9 @@ ifeq ($(BUILT-IN-OBJ),1)
 
 quiet_cmd_link_o_target = LD      $@
 # If the list of objects to link is empty, just create an empty built-in.o
-ifeq ($(TOOLCHAIN),armclang)
-      cmd_link_o_target = $(if $(strip $(obj-y)),\
-              $(LD) -Wl$(comma)$(subst $(space),$(comma),$(strip $(ld_flags) --partial)) -nostdlib $(LINK_CFLAGS) -o $@ $(obj-y), \
-              $(call CMDRMFILE,$@) && $(AR) --create --debug_symbols $@)
-else
       cmd_link_o_target = $(if $(strip $(obj-y)),\
               $(LD) -Wl$(comma)$(subst $(space),$(comma),$(strip $(ld_flags) -r)) -nostdlib -nostartfiles $(LINK_CFLAGS) -o $@ $(obj-y), \
               $(call CMDRMFILE,$@) && $(AR) rcs$(KBUILD_ARFLAGS) $@)
-endif
 
 $(builtin-target): $(buildobj-y) FORCE
 	$(call if_changed,link_o_target)
@@ -422,11 +408,7 @@ endif # builtin-target
 ifdef lib-target
 
 quiet_cmd_link_l_target = AR      $@
-ifeq ($(TOOLCHAIN),armclang)
-      cmd_link_l_target = $(call CMDRMFILE,$@) && $(AR) --create --debug_symbols $@ $(lib-y)
-else
       cmd_link_l_target = $(call CMDRMFILE,$@) && $(AR) rcs$(KBUILD_ARFLAGS) $@ $(lib-y)
-endif
 
 $(lib-target): $(buildlib-y) FORCE
 	$(call if_changed,link_l_target)
@@ -451,11 +433,7 @@ $($(subst $(obj)/,,$(@:.o=-objs)))    \
 $($(subst $(obj)/,,$(@:.o=-y)))), $^)
 
 quiet_cmd_link_multi-y = LD      $@
-ifeq ($(TOOLCHAIN),armclang)
-      cmd_link_multi-y = $(LD) -Wl,$(subst $(space),$(comma),$(strip $(ld_flags) --partial)) -nostdlib $(LINK_CFLAGS) -o $@ $(link_multi_deps)
-else
       cmd_link_multi-y = $(LD) -Wl,$(subst $(space),$(comma),$(strip $(ld_flags) -r --whole-archive)) -nostdlib -nostartfiles $(LINK_CFLAGS) -o $@ $(link_multi_deps)
-endif
 
 $(multi-used-y): FORCE
 	$(call if_changed,link_multi-y)

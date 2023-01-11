@@ -249,18 +249,6 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
           else echo sh; fi ; fi)
 
 # Make variables (CC, etc...)
-ifeq ($(TOOLCHAIN),armclang)
-CC		= armclang --target=arm-arm-none-eabi
-CPP		= $(CC) -E
-AS		= $(CC)
-C++		= $(CC)
-LD		= $(CC)
-AR		= armar
-NM		= fromelf
-STRIP	= fromelf
-OBJCOPY	= fromelf
-OBJDUMP	= fromelf
-else
 AS		= $(CROSS_COMPILE)as
 CC		= $(CROSS_COMPILE)gcc
 CPP		= $(CC) -E
@@ -272,7 +260,6 @@ NM		= $(CROSS_COMPILE)nm
 STRIP	= $(CROSS_COMPILE)strip
 OBJCOPY	= $(CROSS_COMPILE)objcopy
 OBJDUMP	= $(CROSS_COMPILE)objdump
-endif
 
 AWK		= awk
 PERL	= perl
@@ -289,21 +276,14 @@ KBUILD_CFLAGS	:= -fno-common -fmessage-length=0 -Wall \
 # on ARM platform.
 KBUILD_CFLAGS	+= -fsigned-char
 
-ifneq ($(TOOLCHAIN),armclang)
 # 1) Avoid checking out-of-bound array accesses in a loop
 #    (and unrolling/peeling/exiting the loop based on the check)
 # 2) Avoid detecting paths dereferencing a NULL pointer
 #    (and turning the problematic statement into a trap)
 KBUILD_CFLAGS	+= -fno-aggressive-loop-optimizations \
 		   -fno-isolate-erroneous-paths-dereference
-endif
-
 # Treat floating-point constants as float instead of double
-ifeq ($(TOOLCHAIN),armclang)
-KBUILD_CFLAGS	+= -cl-single-precision-constant -fshort-enums
-else
 KBUILD_CFLAGS	+= -fsingle-precision-constant
-endif
 KBUILD_CFLAGS	+= -Wdouble-promotion -Wfloat-conversion
 
 KBUILD_CFLAGS	+= -g
@@ -349,11 +329,7 @@ export LINK_CFLAGS
 # Link flags for image only
 LIB_LDFLAGS		:=
 CFLAGS_IMAGE	:= -static
-ifeq ($(TOOLCHAIN),armclang)
-LDFLAGS_IMAGE	:= --no_locals
-else
 LDFLAGS_IMAGE	:= -X --no-wchar-size-warning
-endif
 
 # Include target definitions
 include $(srctree)/$(TARGET_CFG_FILE)
@@ -366,61 +342,14 @@ ifneq ($(filter-out %/,$(init-y) $(core-y)),)
 $(error The object files cannot be linked at top level: $(filter-out %/,$(init-y) $(core-y)))
 endif
 
-ifeq ($(TOOLCHAIN),armclang)
-# Entry objects
-ifeq ($(entry-y),)
-entry-y		+= utils/boot_struct/boot_struct.o
-ifeq ($(ROM_BUILD),1)
-entry-y		+= tests/rom/startup_ARMCM.o
-ifneq ($(filter tests/rom/,$(core-y)),)
-entry-y		+= tests/rom/export_fn_rom.o
-endif
-else # !ROM_BUILD
-entry-y		+= platform/cmsis/retarget_armclang_asm.o
-ifeq ($(PROGRAMMER),1)
-entry-y		+= tests/programmer/sys_api_programmer.o
-else
-entry-y		+= platform/main/startup_main.o
-endif
-endif # !ROM_BUILD
-endif
-ifeq ($(filter %.o,$(entry-y)),)
-$(error Entry objects must be defined in entry-y in target.mk)
-endif
-BAD_ENTRY_OBJS := $(filter-out %.o,$(entry-y))
-ifneq ($(BAD_ENTRY_OBJS),)
-$(error Only objects can be defined in entry-y in target.mk: $(BAD_ENTRY_OBJS))
-endif
-IMAGE_ENTRY := $(entry-y)
-ifeq ($(ROM_BUILD),1)
-CFLAGS_IMAGE	+= -e Reset_Handler
-else ifeq ($(PROGRAMMER),1)
-CFLAGS_IMAGE	+= -e programmer_start
-else
-CFLAGS_IMAGE	+= -e __main
-endif
-endif
-
 ifneq ($(NO_BUILDID),1)
-ifneq ($(TOOLCHAIN),armclang)
 LDFLAGS_IMAGE	+= --build-id
 endif
-endif
 ifeq ($(CROSS_REF),1)
-ifeq ($(TOOLCHAIN),armclang)
-LDFLAGS_IMAGE	+= --xref
-else
 LDFLAGS_IMAGE	+= --cref
-endif
 endif
 
 REAL_LDS_FILE := $(LDS_FILE)
-ifeq ($(TOOLCHAIN),armclang)
-SCATTER_LDS_SUFFIX := _scat
-ifeq ($(filter %$(SCATTER_LDS_SUFFIX),$(LDS_FILE)),)
-REAL_LDS_FILE := $(LDS_FILE)$(SCATTER_LDS_SUFFIX)
-endif
-endif
 
 # Generate REVISION_INFO (might be defined in target)
 ifeq ($(REVISION_INFO),)
@@ -455,19 +384,11 @@ endif
 LST_SECTION_OPTS :=
 LST_SECTION_NAME :=
 ifneq ($(LST_ONLY_SECTION),)
-ifeq ($(TOOLCHAIN),armclang)
-LST_SECTION_OPTS += $(foreach m,$(subst $(comma),$(space),$(LST_ONLY_SECTION)),--only=$m )
-else
 LST_SECTION_OPTS += $(foreach m,$(subst $(comma),$(space),$(LST_ONLY_SECTION)),-j $m )
-endif
 LST_SECTION_NAME := _$(subst *,+,$(subst !,-,$(LST_ONLY_SECTION)))
 endif
 ifneq ($(LST_RM_SECTION),)
-ifeq ($(TOOLCHAIN),armclang)
-LST_SECTION_OPTS += $(foreach m,$(subst $(comma),$(space),$(LST_RM_SECTION)),--ignore_section=$m )
-else
 LST_SECTION_OPTS += $(foreach m,$(subst $(comma),$(space),$(LST_RM_SECTION)),-R $m )
-endif
 LST_SECTION_NAME := $(LST_SECTION_NAME)_no_$(subst *,+,$(subst !,-,$(LST_RM_SECTION)))
 endif
 
@@ -504,11 +425,7 @@ else
 all: $(IMAGE_BIN) ;
 endif
 
-ifeq ($(TOOLCHAIN),armclang)
-      cmd_gen-IMAGE_BIN = $(OBJCOPY) --bincombined -o $@ $<
-else
       cmd_gen-IMAGE_BIN = $(OBJCOPY) -R .trc_str -O binary $< $@
-endif
 quiet_cmd_gen-IMAGE_BIN = GENBIN  $@
 
 $(IMAGE_BIN): $(IMAGE_FILE)
@@ -518,15 +435,11 @@ else
 	+$(call if_changed,gen-IMAGE_BIN)
 endif
 
-ifeq ($(TOOLCHAIN),armclang)
-      cmd_gen-STR_BIN = $(OBJCOPY) --bincombined -o $@ $<
-else
       cmd_gen-STR_BIN = $(OBJCOPY) -j .code_start_addr -j .rodata_str  -j .trc_str \
           --change-section-lma .code_start_addr=0x00000000 \
           --change-section-lma .rodata_str=0x00000010 \
           --change-section-lma .trc_str=0x00008000 \
           -O binary $< $@
-endif
 quiet_cmd_gen-STR_BIN = GENBIN  $@
 
 $(STR_BIN): $(IMAGE_FILE)
@@ -536,7 +449,6 @@ else
 	+$(call if_changed,gen-STR_BIN)
 endif
 
-ifneq ($(TOOLCHAIN),armclang)
       cmd_gen-IMAGE_HEX = $(OBJCOPY) -O ihex $< $@
 quiet_cmd_gen-IMAGE_HEX = GENHEX  $@
 
@@ -546,7 +458,6 @@ ifeq ($(COMPILE_ONLY),1)
 else
 	+$(call if_changed,gen-IMAGE_HEX)
 endif
-endif
 
 PHONY += lst lst_only
 lst lst_only: $(IMAGE_LST) ;
@@ -555,14 +466,10 @@ ifneq ($(filter lst_only,$(MAKECMDGOALS)),)
 NO_COMPILE := 1
 endif
 
-ifeq ($(TOOLCHAIN),armclang)
-      cmd_gen-IMAGE_LST = $(OBJDUMP) $(LST_SECTION_OPTS) --datasymbols --text -c -d --output=$@ $<
-else
 ifeq ($(LST_SECTION_OPTS),)
       cmd_gen-IMAGE_LST = $(OBJDUMP) -Sldx $< > $@
 else
       cmd_gen-IMAGE_LST = $(OBJCOPY) $(LST_SECTION_OPTS) $< $(IMAGE_SEC) && $(OBJDUMP) -Sldx $(IMAGE_SEC) > $@
-endif
 endif
 quiet_cmd_gen-IMAGE_LST = GENLST  $@
 
@@ -608,10 +515,6 @@ KBUILD_ARFLAGS := D
 
 include $(srctree)/scripts/extrawarn.mk
 endif # CONFIG_STRICT_CFLAGS
-
-ifeq ($(TOOLCHAIN),armclang)
-KBUILD_CFLAGS += -Wno-typedef-redefinition
-endif
 
 # Add user supplied CPPFLAGS, AFLAGS and CFLAGS as the last assignments
 KBUILD_CPPFLAGS += $(KCPPFLAGS)
@@ -729,26 +632,6 @@ lds: $(LDS_TARGET) ;
 #    any weak symbol, for LD only searches the archive if there is a undefined
 #    symbol (and a weak symbol is considered as a defined symbol).
 #
-ifeq ($(TOOLCHAIN),armclang)
-#LDFLAGS_IMAGE += --symbols --list_mapping_symbols
-ifeq ($(KBUILD_VERBOSE),1)
-LDFLAGS_IMAGE += --verbose
-endif
-
-      cmd_link-IMAGE_FILE = $(LD) -o $@ \
-	      $(CFLAGS_IMAGE) \
-	      -Wl,$(subst $(space),$(comma),$(strip \
-	      $(LDFLAGS) $(LDFLAGS_IMAGE) \
-	      --scatter=$(LDS_TARGET) \
-	      --list=$(IMAGE_MAP) \
-	      --info=summarysizes --info=summarystack --info=totals --info=unused \
-	      --map --load_addr_map_info \
-	      --remove --no_autoat \
-	      --emit_debug_overlay_relocs --emit_debug_overlay_section \
-	      --diag_style=gnu --diag_suppress=L6314 --diag_suppress=L6329)) \
-	      $(IMAGE_ENTRY) $(IMAGE_INIT) $(IMAGE_MAIN) $(IMAGE_VER) \
-	      $(LIB_LDFLAGS) $(LIB_LDFLAGS)
-else
       cmd_link-IMAGE_FILE = $(LD) -o $@ \
 		  $(LD_USE_PATCH_SYMBOL) \
 	      -T $(LDS_TARGET) \
@@ -761,7 +644,6 @@ else
 	      $(IMAGE_INIT) $(IMAGE_MAIN) $(IMAGE_VER) \
 	      -Wl,--no-whole-archive $(LIB_LDFLAGS) $(LIB_LDFLAGS)
 		  
-endif
 quiet_cmd_link-IMAGE_FILE = LINK    $@
 
 
