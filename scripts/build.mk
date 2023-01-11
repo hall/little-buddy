@@ -184,21 +184,15 @@ __build: $(builtin-target) $(lib-target) $(buildextra-y) $(buildsubdir-y) $(lst_
 # Compile C sources (.c)
 # ---------------------------------------------------------------------------
 
-# Default is built-in, unless we know otherwise
-quiet_modtag := $(empty)   $(empty)
-
-quiet_cmd_cc_dummy = CC $(quiet_modtag)  $@
 cmd_cc_dummy       = $(CC) $(KBUILD_CPPFLAGS) $(KBUILD_CFLAGS) -c -x c -o $@ $(devnull)
 
 # For dummy object files. Recipe is: $(call if_changed,cc_dummy)
 
-quiet_cmd_cc_s_c = CC $(quiet_modtag)  $@
 cmd_cc_s_c       = $(CC) $(c_flags) $(DISABLE_LTO) -fverbose-asm -S -o $@ $<
 
 $(obj)/%.s: $(src)/%.c FORCE
 	$(call if_changed_dep,cc_s_c)
 
-quiet_cmd_cc_i_c = CPP $(quiet_modtag) $@
 cmd_cc_i_c       = $(CPP) $(c_flags) -o $@ $<
 
 $(obj)/%.i: $(src)/%.c FORCE
@@ -208,7 +202,6 @@ $(obj)/%.i: $(src)/%.c FORCE
 # The C file is compiled and updated dependency information is generated.
 # (See cmd_cc_o_c + relevant part of rule_cc_o_c)
 
-quiet_cmd_cc_o_c = CC $(quiet_modtag)  $@
 cmd_cc_o_c       = $(CC) $(c_flags) -c -o $@ $<
 
 define rule_cc_o_c
@@ -222,7 +215,6 @@ $(obj)/%.o: $(src)/%.c FORCE
 # Compile C++ sources (.cpp)
 # ---------------------------------------------------------------------------
 
-quiet_cmd_cc_s_c++ = C++ $(quiet_modtag) $@
 cmd_cc_s_c++       = $(CC) $(c++_flags) $(DISABLE_LTO) -fverbose-asm -S -o $@ $<
 
 $(obj)/%.s: $(src)/%.cpp FORCE
@@ -231,7 +223,6 @@ $(obj)/%.s: $(src)/%.cpp FORCE
 $(obj)/%.s: $(src)/%.cc FORCE
 	$(call if_changed_dep,cc_s_c++)
 
-quiet_cmd_cc_i_c++ = CPP $(quiet_modtag) $@
 cmd_cc_i_c++       = $(CPP) $(c++_flags) -o $@ $<
 
 $(obj)/%.i: $(src)/%.cpp FORCE
@@ -244,7 +235,6 @@ $(obj)/%.i: $(src)/%.cc FORCE
 # The C++ file is compiled and updated dependency information is generated.
 # (See cmd_cc_o_c++ + relevant part of rule_cc_o_c)
 
-quiet_cmd_cc_o_c++ = C++ $(quiet_modtag) $@
 cmd_cc_o_c++       = $(C++) $(c++_flags) -c -o $@ $<
 
 define rule_cc_o_c++
@@ -261,13 +251,11 @@ $(obj)/%.o: $(src)/%.cc FORCE
 # Compile assembler sources (.S)
 # ---------------------------------------------------------------------------
 
-quiet_cmd_as_s_S = CPP $(quiet_modtag) $@
 cmd_as_s_S       = $(CPP) $(a_cpp_flags) -o $@ $<
 
 $(obj)/%.s: $(src)/%.S FORCE
 	$(call if_changed_dep,as_s_S)
 
-quiet_cmd_as_o_S = AS $(quiet_modtag)  $@
 cmd_as_o_S       = $(CC) $(a_flags) -c -o $@ $<
 
 $(obj)/%.o: $(src)/%.S FORCE
@@ -279,8 +267,7 @@ targets += $(MAKECMDGOALS) $(always)
 # Common list command
 # ---------------------------------------------------------------------------
 
-quiet_cmd_dump_lst_o = MKLST   $@
-      cmd_dump_lst_o = $(OBJDUMP) -Sdlxr $< > $@
+cmd_dump_lst_o = $(OBJDUMP) -Sdlxr $< > $@
 
 lst-cmd = @$(call echo-cmd,dump_lst_o) $(cmd_dump_lst_o)
 
@@ -317,8 +304,7 @@ endif
 
 # Archive without source files
 
-      cmd_use_lib_file = $(call CMDCPFILE,$<,$@)
-quiet_cmd_use_lib_file = USELIB  $(@)
+cmd_use_lib_file = $(call CMDCPFILE,$<,$@)
 
 ifneq ($(archive-bin-y),)
 
@@ -347,8 +333,7 @@ $(error Conflicted options: GEN_LIB and FORCE_TO_USE_LIB)
 endif
 ifneq ($(archive-src-target),)
 
-      cmd_gen_lib_file = ( $(call create_dir,$(dir $(@))) ) && $(call archive-cmd,$(filter-out $(PHONY),$^))
-quiet_cmd_gen_lib_file = GENLIB  $(@)
+cmd_gen_lib_file = ( $(call create_dir,$(dir $(@))) ) && $(call archive-cmd,$(filter-out $(PHONY),$^))
 
 define archive-src-target-rule
 $(1): $(addprefix $(obj)/,$(patsubst %/,%/$(notdir $(builtin-target)),$($(notdir $(1:.a=-y)))))
@@ -376,18 +361,16 @@ ifdef builtin-target
 
 ifeq ($(BUILT-IN-OBJ),1)
 
-quiet_cmd_link_o_target = LD      $@
 # If the list of objects to link is empty, just create an empty built-in.o
-      cmd_link_o_target = $(if $(strip $(obj-y)),\
-              $(LD) -Wl$(comma)$(subst $(space),$(comma),$(strip $(ld_flags) -r)) -nostdlib -nostartfiles $(LINK_CFLAGS) -o $@ $(obj-y), \
-              $(call CMDRMFILE,$@) && $(AR) rcs$(KBUILD_ARFLAGS) $@)
+cmd_link_o_target = $(if $(strip $(obj-y)),\
+        $(LD) -Wl$(comma)$(subst $(space),$(comma),$(strip $(ld_flags) -r)) -nostdlib -nostartfiles $(LINK_CFLAGS) -o $@ $(obj-y), \
+        $(call CMDRMFILE,$@) && $(AR) rcs$(KBUILD_ARFLAGS) $@)
 
 $(builtin-target): $(buildobj-y) FORCE
 	$(call if_changed,link_o_target)
 
 else # BUILT-IN-OBJ
 
-quiet_cmd_ar_o_target = AR      $@
 cmd_ar_o_target = $(call archive-cmd,$(obj-y))
 
 $(builtin-target): $(buildobj-y) FORCE
@@ -407,8 +390,7 @@ endif # builtin-target
 #
 ifdef lib-target
 
-quiet_cmd_link_l_target = AR      $@
-      cmd_link_l_target = $(call CMDRMFILE,$@) && $(AR) rcs$(KBUILD_ARFLAGS) $@ $(lib-y)
+cmd_link_l_target = $(call CMDRMFILE,$@) && $(AR) rcs$(KBUILD_ARFLAGS) $@ $(lib-y)
 
 $(lib-target): $(buildlib-y) FORCE
 	$(call if_changed,link_l_target)
@@ -432,8 +414,7 @@ $(filter $(addprefix $(obj)/,         \
 $($(subst $(obj)/,,$(@:.o=-objs)))    \
 $($(subst $(obj)/,,$(@:.o=-y)))), $^)
 
-quiet_cmd_link_multi-y = LD      $@
-      cmd_link_multi-y = $(LD) -Wl,$(subst $(space),$(comma),$(strip $(ld_flags) -r --whole-archive)) -nostdlib -nostartfiles $(LINK_CFLAGS) -o $@ $(link_multi_deps)
+cmd_link_multi-y = $(LD) -Wl,$(subst $(space),$(comma),$(strip $(ld_flags) -r --whole-archive)) -nostdlib -nostartfiles $(LINK_CFLAGS) -o $@ $(link_multi_deps)
 
 $(multi-used-y): FORCE
 	$(call if_changed,link_multi-y)

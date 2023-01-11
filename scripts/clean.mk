@@ -96,11 +96,9 @@ endif
 
 else # SUBMODS
 
-ifeq ($(ALLCLEAN),1)
 RM_ALL := 1
 ifneq ($(KBUILD_OUTPUT),)
 RM_DIR := 1
-endif
 endif
 
 ifeq ($(RM_DIR),1)
@@ -126,19 +124,16 @@ __clean-dirs	:= $(wildcard $(__clean-dirs))
 
 ifeq ($(RM_DIR),1)
 
-quiet_cmd_clean    = RMDIR   $(obj)
-      cmd_clean    = $(call CMDRMDIR,$(obj))
+cmd_clean    = $(call CMDRMDIR,$(obj))
 
 else # RM_DIR
 
-quiet_cmd_clean    = CLEAN   $(obj)
 ifeq ($(RM_ALL),1)
-      cmd_clean    = $(call CMDRMFILER,$(obj),*.o *.a *.s *.d)
+cmd_clean    = $(call CMDRMFILER,$(obj),*.o *.a *.s *.d)
 else
-      cmd_clean    = $(call CMDRMFILE,$(__clean-files))
+cmd_clean    = $(call CMDRMFILE,$(__clean-files))
 endif
-quiet_cmd_cleandir = CLEAN   $(__clean-dirs)
-      cmd_cleandir = $(call CMDRMDIR,$(__clean-dirs))
+cmd_cleandir = $(call CMDRMDIR,$(__clean-dirs))
 
 endif # RM_DIR
 

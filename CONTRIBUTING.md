@@ -15,10 +15,10 @@ nix develop  # or use direnv or do the setup yourself, whatever
 Build the project with
 
 ```sh
-nix build
+make -j
 ```
 
-The compiled `.bin` firmware will be in the `result/` directory.
+The compiled firmware will be at `./out/firmware.bin`.
 
 ## flash
 

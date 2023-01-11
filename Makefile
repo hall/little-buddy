@@ -1,23 +1,3 @@
-
-CONFIG_CROSS_COMPILE := arm-none-eabi-
-CONFIG_STRICT_CFLAGS ?= y
-CONFIG_SAVE_TARGET ?= n
-
-export CONFIG_STRICT_CFLAGS CONFIG_SAVE_TARGET
-
-# Do not use make's built-in rules and variables
-# (this increases performance and avoids hard-to-debug behaviour);
-MAKEFLAGS += -rR
-
-# Avoid funny character set dependencies
-unexport LC_ALL
-LC_COLLATE=C
-LC_NUMERIC=C
-export LC_COLLATE LC_NUMERIC
-
-# Avoid interference with shell env settings
-unexport GREP_OPTIONS
-
 # Check if just to show the help content
 ifeq ($(MAKECMDGOALS),help)
 HELP_TARGET := 1
@@ -40,79 +20,6 @@ ifneq ($(HELP_TARGET),1)
 # descending is started. They are now explicitly listed as the
 # prepare rule.
 
-# Beautify output
-# ---------------------------------------------------------------------------
-#
-# Normally, we echo the whole command before executing it. By making
-# that echo $($(quiet)$(cmd)), we now have the possibility to set
-# $(quiet) to choose other forms of output instead, e.g.
-#
-#         quiet_cmd_cc_o_c = Compiling $(RELDIR)/$@
-#         cmd_cc_o_c       = $(CC) $(c_flags) -c -o $@ $<
-#
-# If $(quiet) is empty, the whole command will be printed.
-# If it is set to "quiet_", only the short version will be printed.
-# If it is set to "silent_", nothing will be printed at all, since
-# the variable $(silent_cmd_cc_o_c) doesn't exist.
-#
-# A simple variant is to prefix commands with $(Q) - that's useful
-# for commands that shall be hidden in non-verbose mode.
-#
-#	$(Q)ln $@ :<
-#
-# If KBUILD_VERBOSE equals 0 then the above command will be hidden.
-# If KBUILD_VERBOSE equals 1 then the above command is displayed.
-#
-# To put more focus on warnings, be less verbose as default
-# Use 'make V=1' to see the full commands
-
-ifeq ("$(origin V)","command line")
-  KBUILD_VERBOSE = $(V)
-endif
-ifndef KBUILD_VERBOSE
-  KBUILD_VERBOSE = 0
-endif
-
-ifeq ($(KBUILD_VERBOSE),1)
-  quiet :=
-  Q :=
-else
-  quiet := quiet_
-  Q := @
-endif
-
-# If the user is running make -s (silent mode), suppress echoing of
-# commands
-
-ifneq ($(filter 4.%,$(MAKE_VERSION)),) # make-4
-ifneq ($(filter %s ,$(firstword x$(MAKEFLAGS))),)
-  quiet=silent_
-endif
-else                                   # make-3.8x
-ifneq ($(filter s% -s%,$(MAKEFLAGS)),)
-  quiet=silent_
-endif
-endif
-
-export quiet Q KBUILD_VERBOSE
-
-TARGET_CFG_FILE = config/target.mk
-TARGET_COMMON_FILE = config/common.mk
-
-# To locate output files in a separate directory two syntaxes are supported.
-# In both cases the working directory must be the root of the kernel src.
-# 1) O=
-# Use "make O=dir/to/store/output/files/"
-#
-# 2) Set KBUILD_OUTPUT
-# Set the environment variable KBUILD_OUTPUT to point to the directory
-# where the output files shall be placed.
-# export KBUILD_OUTPUT=dir/to/store/output/files/
-# make
-#
-# The O= assignment takes precedence over the KBUILD_OUTPUT environment
-# variable.
-
 # KBUILD_SRC is set on invocation of make in OBJ directory
 # KBUILD_SRC is not intended to be used by the regular user (for now)
 ifeq ($(KBUILD_SRC),)
@@ -121,13 +28,7 @@ export KBUILD_ROOT := $(CURDIR)
 
 # OK, Make called in directory where kernel src resides
 # Do we want to locate output files in a separate directory?
-
 export KBUILD_OUTPUT := $(CURDIR)/out
-ifeq ("$(origin O)","command line")
-  KBUILD_OUTPUT := $(O)
-endif
-
-
 
 # That's our default target when none is given on the command line
 PHONY := _all
@@ -153,23 +54,16 @@ $(filter-out _all sub-make $(CURDIR)/Makefile, $(MAKECMDGOALS)) _all: sub-make
 
 include $(CURDIR)/scripts/submods_init.mk
 
-ifneq ($(filter allclean,$(MAKECMDGOALS)),)
-ALLCLEAN := 1
-export ALLCLEAN
-endif
 
 # Look for make include files relative to root of kernel src
 MAKEFLAGS += --include-dir=$(CURDIR)
 
-START_TIME := $(shell date +"%s.%N")
-START_DATE_TIME := $(shell date +"%Y-%m-%d %T.%N")
-
 sub-make: FORCE
-	@echo MAKE START: $(START_DATE_TIME)
+	@echo MAKE START: $(shell date +"%Y-%m-%d %T.%N")
 	$(Q)$(MAKE) -C $(KBUILD_OUTPUT) KBUILD_SRC=$(CURDIR) \
 		-f $(CURDIR)/Makefile $(filter-out _all sub-make,$(MAKECMDGOALS))
 	@echo MAKE END: $$(date +"%Y-%m-%d %T.%N")
-	@printf "MAKE TIME: %.2f seconds\n" $$(echo "$$(date +%s.%N) - $(START_TIME)" | bc)
+	@printf "MAKE TIME: %.2f seconds\n" $$(echo "$$(date +%s.%N) - $(shell date +"%s.%N")" | bc)
 
 # Leave processing to above invocation of make
 skip-makefile := 1
@@ -212,12 +106,8 @@ VPATH		:= $(srctree)
 
 export srctree objtree VPATH
 
-# Git revision
-GIT_REVISION := $(shell (which git >/dev/null 2>&1) && (git rev-parse --short HEAD 2>/dev/null))
-
-ifneq ($(GIT_REVISION),)
-GIT_REVISION := $(GIT_REVISION)$(shell (git diff --quiet && git diff --cached --quiet) >/dev/null 2>&1 || echo -dirty)
-endif
+GIT_DIRTY := $(shell (git diff --quiet && git diff --cached --quiet) >/dev/null 2>&1 || echo -dirty)
+GIT_REVISION := $(shell (which git >/dev/null 2>&1) && (git rev-parse --short HEAD 2>/dev/null))$(GIT_DIRTY)
 
 
 # Cross compiling and selecting different set of gcc/bin-utils
@@ -240,8 +130,8 @@ endif
 # "make" in the configured kernel build directory always uses that.
 # Default value for CROSS_COMPILE is not to prefix executables
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
-ARCH		?= arm
-CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
+ARCH		    ?= arm
+CROSS_COMPILE	?= arm-none-eabi-
 
 # SHELL used by kbuild
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -332,11 +222,11 @@ CFLAGS_IMAGE	:= -static
 LDFLAGS_IMAGE	:= -X --no-wchar-size-warning
 
 # Include target definitions
-include $(srctree)/$(TARGET_CFG_FILE)
-include $(srctree)/$(TARGET_COMMON_FILE)
+include $(srctree)/config/target.mk
+include $(srctree)/config/common.mk
 
-$(srctree)/$(TARGET_CFG_FILE): ;
-$(srctree)/$(TARGET_COMMON_FILE): ;
+$(srctree)/config/target.mk: ;
+$(srctree)/config/common.mk: ;
 
 ifneq ($(filter-out %/,$(init-y) $(core-y)),)
 $(error The object files cannot be linked at top level: $(filter-out %/,$(init-y) $(core-y)))
@@ -426,7 +316,6 @@ all: $(IMAGE_BIN) ;
 endif
 
       cmd_gen-IMAGE_BIN = $(OBJCOPY) -R .trc_str -O binary $< $@
-quiet_cmd_gen-IMAGE_BIN = GENBIN  $@
 
 $(IMAGE_BIN): $(IMAGE_FILE)
 ifneq ($(filter 1,$(COMPILE_ONLY) $(NO_BIN)),)
@@ -440,7 +329,6 @@ endif
           --change-section-lma .rodata_str=0x00000010 \
           --change-section-lma .trc_str=0x00008000 \
           -O binary $< $@
-quiet_cmd_gen-STR_BIN = GENBIN  $@
 
 $(STR_BIN): $(IMAGE_FILE)
 ifneq ($(filter 1,$(COMPILE_ONLY) $(NO_BIN)),)
@@ -450,7 +338,6 @@ else
 endif
 
       cmd_gen-IMAGE_HEX = $(OBJCOPY) -O ihex $< $@
-quiet_cmd_gen-IMAGE_HEX = GENHEX  $@
 
 $(IMAGE_HEX): $(IMAGE_FILE)
 ifeq ($(COMPILE_ONLY),1)
@@ -471,7 +358,6 @@ ifeq ($(LST_SECTION_OPTS),)
 else
       cmd_gen-IMAGE_LST = $(OBJCOPY) $(LST_SECTION_OPTS) $< $(IMAGE_SEC) && $(OBJDUMP) -Sldx $(IMAGE_SEC) > $@
 endif
-quiet_cmd_gen-IMAGE_LST = GENLST  $@
 
 $(IMAGE_LST): $(IMAGE_FILE)
 	+$(call if_changed,gen-IMAGE_LST)
@@ -479,13 +365,6 @@ $(IMAGE_LST): $(IMAGE_FILE)
 
 # Flags
 
-# arch Makefile may override CC so keep this after arch Makefile is included
-#ifeq ($(CONFIG_STRICT_CFLAGS),y)
-#NOSTDINC_FLAGS += -nostdinc
-#endif
-#NOSTDINC_FLAGS += -isystem "$(subst \,/,$(shell $(CC) -print-file-name=include))"
-
-ifeq ($(CONFIG_STRICT_CFLAGS),y)
 # warn about C99 declaration after statement
 #C_ONLY_FLAGS    += -Wdeclaration-after-statement
 
@@ -498,9 +377,9 @@ C_ONLY_FLAGS   += -Werror=implicit-int
 C_ONLY_FLAGS    += -Werror-implicit-function-declaration
 
 # Prohibit date/time macros, which would make the build non-deterministic
-KBUILD_CFLAGS   += $(call cc-option,-Werror=date-time)
+KBUILD_CFLAGS   += -Werror=date-time
 
-KBUILD_CFLAGS   += $(call cc-option,-Wlogical-op)
+KBUILD_CFLAGS   += -Wlogical-op
 
 #KBUILD_CFLAGS   += -Wno-address-of-packed-member
 
@@ -514,7 +393,6 @@ KBUILD_CFLAGS	+= -Wno-trigraphs \
 KBUILD_ARFLAGS := D
 
 include $(srctree)/scripts/extrawarn.mk
-endif # CONFIG_STRICT_CFLAGS
 
 # Add user supplied CPPFLAGS, AFLAGS and CFLAGS as the last assignments
 KBUILD_CPPFLAGS += $(KCPPFLAGS)
@@ -584,7 +462,6 @@ endif
 
 BUILD_INFO_FLAGS += -DKERNEL=$(KERNEL)
 
-quiet_cmd_image_ver = CC      $(IMAGE_VER)
       cmd_image_ver = $(CC) $(filter-out -Werror=date-time, \
                              $(call flags,KBUILD_CPPFLAGS) \
                              $(call flags,KBUILD_CFLAGS) \
@@ -601,7 +478,6 @@ $(IMAGE_VER): $(IMAGE_VER_SRC) $(filter-out $(IMAGE_VER),$(IMAGE-deps)) FORCE
 
 # Linker scripts preprocessor (.lds.S -> .lds)
 # ---------------------------------------------------------------------------
-quiet_cmd_cpp_lds_S = LDS     $@
       cmd_cpp_lds_S = $(CPP) $(call flags,KBUILD_CPPFLAGS) \
                              $(call flags,CPPFLAGS_$(LDS_FILE)) \
                              -MD -MP -MF $(depfile) -MT $@ \
@@ -644,7 +520,6 @@ lds: $(LDS_TARGET) ;
 	      $(IMAGE_INIT) $(IMAGE_MAIN) $(IMAGE_VER) \
 	      -Wl,--no-whole-archive $(LIB_LDFLAGS) $(LIB_LDFLAGS)
 		  
-quiet_cmd_link-IMAGE_FILE = LINK    $@
 
 
 # Include targets which we want to
@@ -700,22 +575,12 @@ ifeq ($(SUBMODS),)
 	$(Q)$(call CMDRMFILER,.,*.o *.a *.s *.d)
 endif
 
-PHONY += allclean
-ifeq ($(KBUILD_OUTPUT),)
-allclean: clean ;
-else
 ifeq ($(SUBMODS),)
-quiet_cmd_clean    = RMDIR   $(KBUILD_OUTPUT)
       cmd_clean    = $(call CMDRMDIR,$(KBUILD_OUTPUT))
-
-allclean:
+clean:
 	+$(call cmd,clean)
-else
-allclean: clean ;
-endif
 endif
 
-quiet_cmd_predefined-macros = GEN     $@
       cmd_predefined-macros = $(CPP) $(filter-out -I% -D% -include%,$(KBUILD_CPPFLAGS) $(KBUILD_CFLAGS) $(C_ONLY_FLAGS)) \
                                      -x c -E -dM -o $@ $(devnull)
 
@@ -730,10 +595,8 @@ predefined-macros: $(PREDEF_MACRO_FILE) ;
 # FIXME Should go into a make.lib or something
 # ===========================================================================
 
-quiet_cmd_rmdirs = $(if $(wildcard $(rm-dirs)),CLEAN   $(wildcard $(rm-dirs)))
       cmd_rmdirs = $(if $(wildcard $(rm-dirs)),$(call CMDRMDIR,$(rm-dirs)))
 
-quiet_cmd_rmfiles = $(if $(wildcard $(rm-files)),CLEAN   $(wildcard $(rm-files)))
       cmd_rmfiles = $(if $(wildcard $(rm-files)),$(call CMDRMFILE,$(rm-files)))
 
 # Shorthand for $(Q)$(MAKE) -f scripts/clean.mk obj=dir
@@ -743,13 +606,10 @@ clean := -f $(srctree)/scripts/clean.mk obj
 
 # Generate tags for editors
 # ---------------------------------------------------------------------------
-quiet_cmd_tags = GEN     $@
       cmd_tags = $(CONFIG_SHELL) $(srctree)/tools/tags.sh $@
 
 tags TAGS cscope gtags: FORCE
 	$(call cmd,tags)
-
-HELP_TARGET := 2
 
 endif # ifeq ($(skip-makefile),)
 endif # ifneq ($(HELP_TARGET),1)
@@ -761,33 +621,11 @@ include scripts/include.mk
 endif
 
 help: FORCE
-	$(call echo-help,Cleaning targets:)
-	$(call echo-help,  clean           - Remove most generated files)
-	$(call echo-help,  allclean        - Remove all generated files and the output directory if possible)
-	$(call echo-help,)
-	$(call echo-help,Generic targets:)
-	$(call echo-help,  all             - Build all targets marked with [*])
-	$(call echo-help,  lst             - Build the mixed source/assembly file of the final image)
-	$(call echo-help,  lds             - Build the linker script file)
-ifeq ($(HELP_TARGET),2)
-	$(call echo-help,* $(IMAGE_FILE))
-	$(call echo-help,                  - Build the final image)
-endif
-	$(call echo-help,  dir/            - Build all files in dir and below)
-	$(call echo-help,  dir/file.[oisS] - Build specified target only)
-	$(call echo-help,  dir/file.lst    - Build specified mixed source/assembly target only)
-	$(call echo-help,                    (requires a recent binutils and recent build (System.map)))
-	$(call echo-help,)
-	$(call echo-help,  make V=0|1 [targets] 0 => quiet build (default), 1 => verbose build)
-	$(call echo-help,  make V=2   [targets] 2 => give reason for rebuild of target)
-	$(call echo-help,  make O=dir [targets] Locate all output files in "dir", including .config)
-	$(call echo-help,  make W=n   [targets] Enable extra gcc checks, n=1,2,3 where)
-	$(call echo-help,         1: warnings which may be relevant and do not occur too often)
-	$(call echo-help,         2: warnings which occur quite often but may still be relevant)
-	$(call echo-help,         3: more obscure warnings, can most likely be ignored)
-	$(call echo-help,         Multiple levels can be combined with W=12 or W=123)
-	$(call echo-help,)
-	$(call echo-help,Execute "make" or "make all" to build all targets marked with [*])
+	@echo "  all             - Build all targets"
+	@echo "  lst             - Build the mixed source/assembly file of the final image"
+	@echo "  lds             - Build the linker script file"
+	@echo "  <dir/file>      - Build specified file(s) only"
+	@echo "  clean           - Remove generated files"
 
 endif # ifneq ($(HELP_TARGET),)
 

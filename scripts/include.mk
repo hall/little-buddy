@@ -52,34 +52,9 @@ depfile = $(call get_depfile_name,$@)
 basetarget = $(basename $(notdir $@))
 
 ###
-# filename of first prerequisite with directory and extension stripped
-baseprereq = $(basename $(notdir $<))
-
-###
 # Escape single quote for use in echo statements
 escchar = $(subst $(squote),'\$(squote)',$1)
 
-###
-# Easy method for doing a status message
-       kecho := :
- quiet_kecho := echo
-silent_kecho := :
-kecho := $($(quiet)kecho)
-
-echo-help = @echo '  $(call escchar,$(1))'
-
-###
-# try-run
-try-run = $(shell if ($(1)) >$(devnull) 2>&1; \
-                  then echo "$(2)"; \
-                  else echo "$(3)"; \
-                  fi)
-
-###
-# cc-option
-cc-option = $(call try-run, \
-	$(CC) $(KBUILD_CPPFLAGS) $(KBUILD_CFLAGS) $(1) -c -x c \
-		-o $(devnull) $(devnull),$(1),$(2))
 
 ###
 # Shorthand for $(Q)$(MAKE) -f scripts/build.mk obj=
@@ -96,13 +71,6 @@ addtree = $(if $(patsubst -I%,%,$(1)), \
 
 # Find all -I options and call addtree
 flags = $(foreach o,$($(1)),$(if $(filter -I%,$(o)),$(call addtree,$(o)),$(o)))
-
-# echo command.
-# Short version is used, if $(quiet) equals `quiet_', otherwise full one.
-echo-cmd = $(if $($(quiet)cmd_$(1)),\
-	echo '  $(call escchar,$($(quiet)cmd_$(1)))$(echo-why)' ;)
-echo-cmd-nowhy = $(if $($(quiet)cmd_$(1)),\
-	echo '  $(call escchar,$($(quiet)cmd_$(1)))' ;)
 
 # printing commands
 cmd = @$(echo-cmd) $(cmd_$(1))
@@ -164,45 +132,5 @@ if_changed_dep = $(if $(strip $(any-prereq) $(arg-check)),                   \
 if_changed_rule = $(if $(strip $(any-prereq) $(arg-check)),                  \
 	@ ( $(rule_$(1)) ) &&                                                \
 	  ( $(depfile-add) ))
-
-###
-# why - tell why a a target got build
-#       enabled by make V=2
-#       Output (listed in the order they are checked):
-#          (1) - due to target is PHONY
-#          (2) - due to target missing
-#          (3) - due to: file1.h file2.h
-#          (4) - due to command line change
-#          (5) - due to missing .cmd file
-#          (6) - due to target not in $(targets)
-# (1) PHONY targets are always build
-# (2) No target, so we better build it
-# (3) Prerequisite is newer than target
-# (4) The command line stored in the file named dir/.target.cmd
-#     differed from actual command line. This happens when compiler
-#     options changes
-# (5) No dir/.target.d file (used to store command line)
-# (6) No dir/.target.d file and target not listed in $(targets)
-#     This is a good hint that there is a bug in the kbuild file
-ifeq ($(KBUILD_VERBOSE),2)
-why =                                                                        \
-    $(if $(filter $@, $(PHONY)),- due to target is PHONY,                    \
-        $(if $(wildcard $@),                                                 \
-            $(if $(strip $(any-prereq)),- due to: $(any-prereq),             \
-                $(if $(arg-check),                                           \
-                    $(if $(cmd_$@),- due to command line change,             \
-                        $(if $(filter $@, $(targets)),                       \
-                            - due to missing .d file,                        \
-                            - due to $(notdir $@) not in $$(targets)         \
-                         )                                                   \
-                     )                                                       \
-                 )                                                           \
-             ),                                                              \
-             - due to target missing                                         \
-         )                                                                   \
-     )
-
-echo-why = $(call escchar, $(strip $(why)))
-endif
 
 endif # __INCLUDE_MK__
