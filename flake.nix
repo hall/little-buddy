@@ -2,6 +2,7 @@
   inputs = {
     utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    pre-commit.url = "github:cachix/pre-commit-hooks.nix";
   };
 
   outputs = inputs@{ self, ... }:
@@ -14,16 +15,31 @@
       (system:
         let pkgs = inputs.nixpkgs.legacyPackages.${system}; in
         {
+          formatter = pkgs.treefmt;
           apps = {
             flash = inputs.utils.lib.mkApp {
               drv = pkgs.writeShellScriptBin "tts" ''
                 # should correctly identify the pinebuds
-                id=/dev/serial/by-id/usb-wch.cn_USB_Dual_Serial_0123456789-if
-                for i in 00 02; do
+                path=/dev/serial/by-id/usb-wch.cn_USB_Dual_Serial_0123456789-if
+                for id in 02 00; do
                   # use the given file or a default
                   [ $# -eq 1 ] && bin=$1 || bin=result/little-buddy-*-''${LANGUAGE:-en}.bin
-                  ${self.packages.${system}.bestool}/bin/bestool write-image --port $id$i $bin 
+                  ${self.packages.${system}.bestool}/bin/bestool write-image --port $path$id $bin 
                 done
+              '';
+            };
+            logs = inputs.utils.lib.mkApp {
+              drv = pkgs.writeShellScriptBin "tts" ''
+                if [ $1 == "left" ]; then
+                  id=02
+                elif [ $1 == "right" ]; then
+                  id=00
+                else
+                  echo error: must pass either \"left\" or \"right\" as an argument
+                  exit 1
+                fi
+                path=/dev/serial/by-id/usb-wch.cn_USB_Dual_Serial_0123456789-if
+                ${pkgs.minicom}/bin/minicom -D $path$id -b 2000000
               '';
             };
             tts = inputs.utils.lib.mkApp {
@@ -60,22 +76,14 @@
                 udev
               ];
             };
-
             default = pkgs.stdenv.mkDerivation rec {
               name = "little-buddy";
               src = ./.;
               nativeBuildInputs = with pkgs; [
                 # https://github.com/NixOS/nixpkgs/issues/51907
                 gcc-arm-embedded-9
-
                 bc
                 hostname
-
-                # serial
-                minicom
-                self.packages.${system}.bestool
-
-                # audio
                 ffmpeg
                 xxd
               ];
@@ -91,5 +99,31 @@
               '';
             };
           };
-        });
+          checks = {
+            pre-commit = inputs.pre-commit.lib."${system}".run {
+              src = ./.;
+              hooks = {
+                treefmt = {
+                  name = "treefmt";
+                  enable = true;
+                  types = [ "file" ];
+                  pass_filenames = true;
+                  entry = "${pkgs.treefmt}/bin/treefmt";
+                };
+              };
+            };
+          };
+          devShell = pkgs.mkShell {
+            inherit (self.checks.${system}.pre-commit) shellHook;
+            inputsFrom = [ self.packages.${system}.default ];
+            buildInputs = with pkgs; [
+              # formatters
+              treefmt
+              nixpkgs-fmt
+              nodePackages.prettier
+              clang
+            ];
+          };
+        }
+      );
 }

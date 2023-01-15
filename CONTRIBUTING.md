@@ -15,10 +15,10 @@ nix develop  # or use direnv or do the setup yourself, whatever
 Build the project with
 
 ```sh
-make -j
+nix build  # or `make -j`
 ```
 
-The compiled firmware will be at `./out/firmware.bin`.
+The compiled firmware will be at `./result/*.bin`.
 
 ## language
 
@@ -40,13 +40,17 @@ make -j LANGUAGE=fr
 
 Flash both earbuds:
 
-    for i in 0 1; do bestool write-image --port /dev/ttyACM$i result/*.bin; done
+```sh
+nix run '.#flash' [./path/to/firmware.bin]
+```
 
 ## logs
 
 View logs over the serial port with
 
-    minicom -D /dev/ttyACM0 -b 2000000
+```sh
+nix run '.#logs' <left|right>
+```
 
 ## release
 

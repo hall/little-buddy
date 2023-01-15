@@ -1,0 +1,25 @@
+[formatter.nix]
+command = "nixpkgs-fmt"
+includes = ["*.nix"]
+
+[formatter.prettier]
+command = "prettier"
+options = ["--write"]
+includes = [
+    "*.css",
+    "*.html",
+    "*.js",
+    "*.json",
+    "*.jsx",
+    "*.md",
+    "*.mdx",
+    "*.scss",
+    "*.ts",
+    "*.yaml",
+]
+
+# TODO: breaks compilation
+# [formatter.clang]
+# command = "clang-format"
+# options = [ "-i" ]
+# includes = [ "*.c", "*.cpp", "*.cc", "*.h", "*.hpp", "*.S" ]
