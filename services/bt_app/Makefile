@@ -9,7 +9,7 @@ ifeq ($(VOICE_DATAPATH_TYPE),gsound)
 obj_cpp += $(patsubst $(cur_dir)%,%,$(wildcard $(cur_dir)/app_voice/app_$(VOICE_DATAPATH_TYPE)/*.cpp))
 endif
 
-obj_wav = $(addprefix ../, $(wildcard ../config/res/common/*.wav ../config/res/spoken/$(LANG)/*.wav))
+obj_wav = $(addprefix ../, $(wildcard ../config/res/common/*.wav ../config/res/spoken/$(LANGUAGE)/*.wav))
 
 obj-y := $(obj_wav:.wav=.txt) $(obj_c:.c=.o) $(obj_s:.S=.o) $(obj_cpp:.cpp=.o)
 
@@ -110,7 +110,7 @@ ccflags-y += \
 	-Iservices/osif \
     -Iservices/app_tws/inc \
 	-Iout/config/res/common \
-	-Iout/config/res/spoken/$(LANG)
+	-Iout/config/res/spoken/$(LANGUAGE)
 
 ifeq ($(GATT_OVER_BR_EDR),1)
 ccflags-y += -Iservices/ble_stack/hl/src/l2c/l2cm

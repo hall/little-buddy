@@ -33,7 +33,7 @@ nix run '.#tts' <lang>
 The default language is English but can be changed by passing a [2-digit language code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) to `make`
 
 ```sh
-make -j LANG=fr
+make -j LANGUAGE=fr
 ```
 
 ## flash

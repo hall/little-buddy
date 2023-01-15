@@ -17,14 +17,14 @@
           apps = {
             tts = inputs.utils.lib.mkApp {
               drv = pkgs.writeShellScriptBin "tts" ''
-                LANG=$1
-                dir=./config/res/spoken/$LANG
+                LANGUAGE=$1
+                dir=./config/res/spoken/$LANGUAGE
                 (rm -r $dir || true) && mkdir $dir
 
                 readarray -d "" files < <(find $(dirname $dir)/en -type f -print0)
                 for file in "''${files[@]}"; do
                   phrase=$(basename $file .wav | sed "s/SOUND_//" | tr "_" " ")
-                  ${pkgs.translate-shell}/bin/trans -b :$LANG "$phrase" -download-audio-as ''${file/\/en\//\/$LANG\/};
+                  ${pkgs.translate-shell}/bin/trans -b :$LANGUAGE "$phrase" -download-audio-as ''${file/\/en\//\/$L\/};
                 done
               '';
             };
@@ -69,7 +69,7 @@
                 xxd
               ];
               buildPhase = ''
-                find ./config/res/spoken -maxdepth 1 -mindepth 1 -type d -exec sh -c 'make -j LANG=$(basename {})' \;
+                find ./config/res/spoken -maxdepth 1 -mindepth 1 -type d -exec sh -c 'make -j LANGUAGE=$(basename {})' \;
               '';
               installPhase = ''
                 version=$(cat CHANGELOG.md | grep '^## \[[0-9]' | head -1 | cut -d "[" -f2 | cut -d "]" -f1)
