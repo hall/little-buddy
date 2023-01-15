@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.1.1] - 2023-01-15
+
+This release welcomes a handful of common languages.
+See the `README.md` file for details.
+
+### Added
+
+- support for different notification languages
+
 ## [0.1.0] - 2023-01-09
 
 This release pulls in changes from [OpenPineBuds](https://github.com/pine64/OpenPineBuds).

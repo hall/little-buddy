@@ -261,6 +261,13 @@ cmd_as_o_S       = $(CC) $(a_flags) -c -o $@ $<
 $(obj)/%.o: $(src)/%.S FORCE
 	$(call if_changed_dep,as_o_S)
 
+%.txt: %.wav
+	@ffmpeg -hide_banner -loglevel error \
+	   -i $< -f sbc -ar 16000 -ac 1 -aq 16 - \
+	  | xxd -i | head -n -2 | tail -n +2 \
+	  | sed 's/ //g' | tr --delete '\n' | sed 's/,/\,\n/16; P; D' \
+	  | tr -d ' ' > $@
+
 targets += $(real-objs-y) $(real-objs-m) $(lib-y) $(lst_target)
 targets += $(MAKECMDGOALS) $(always)
 
@@ -280,12 +287,9 @@ $(obj)/%.lst: $(obj)/%.o
 # To build objects in subdirs, we need to descend into the directories
 $(sort $(subdir-obj-y)): $(buildsubdir-y) ;
 
-# Archive command
-
-# Command "echo -e" cannot work on Apple Mac machines, so we use "printf" instead
-archive-cmd = ( printf 'create $@\n\
-  addmod $(subst $(space),$(comma),$(strip $(filter-out %.a,$(1))))\n\
-  $(foreach o,$(filter %.a,$(1)),addlib $o\n)save\nend' | $(AR) -M )
+archive-cmd = printf 'create $@\n\
+  addmod $(subst $(space),$(comma),$(strip $(filter-out %.a %.txt,$(1))))\n\
+  $(foreach o,$(filter %.a,$(1)),addlib $o\n)save\nend' | $(AR) -M
 
 # Archive check
 

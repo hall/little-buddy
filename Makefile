@@ -3,6 +3,8 @@ ifeq ($(MAKECMDGOALS),help)
 HELP_TARGET := 1
 endif
 
+export LANG := en
+
 ifneq ($(HELP_TARGET),1)
 # We are using a recursive build, so we need to do a little thinking
 # to get the ordering right.
@@ -265,7 +267,7 @@ BUILD_USERNAME := $(subst $(space),-,$(strip $(BUILD_USERNAME)))
 # Default kernel image to build when no specific target is given.
 # IMAGE_FILE may be overruled on the command line or
 # set in the environment
-IMAGE_FILE ?= firmware.elf
+IMAGE_FILE ?= firmware-$(LANG).elf
 
 ifneq ($(filter .map .bin .hex .lst,$(suffix $(IMAGE_FILE))),)
 $(error Invalid IMAGE_FILE (conflicted suffix): $(IMAGE_FILE))

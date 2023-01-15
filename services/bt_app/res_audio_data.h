@@ -16,139 +16,126 @@
 
 #ifdef MEDIA_PLAYER_SUPPORT
 
-const uint8_t EN_POWER_ON [] = {
-#include "res/en/SOUND_POWER_ON.txt"
+const uint8_t SOUND_BT_ALEXA_START [] = {
+#include "SOUND_ALEXA_START.txt"
+};
+const uint8_t SOUND_BT_ALEXA_STOP [] = {
+#include "SOUND_ALEXA_STOP.txt"
 };
 
-const uint8_t EN_POWER_OFF [] = {
-#include "res/en/SOUND_POWER_OFF.txt"
+const uint8_t SOUND_BT_ANSWER [] = {
+#include "SOUND_ANSWER.txt"
 };
 
-const uint8_t EN_SOUND_ZERO[] = {
-#include "res/en/SOUND_ZERO.txt"
+const uint8_t SOUND_CHARGE_FINISH [] = {
+#include "SOUND_CHARGE_COMPLETE.txt"
+};
+const uint8_t SOUND_CHARGE_PLEASE [] = {
+#include "SOUND_PLEASE_CHARGE.txt"
 };
 
-const uint8_t EN_SOUND_ONE[] = {
-#include "res/en/SOUND_ONE.txt"
+const uint8_t SOUND_BT_CONNECTED [] = {
+#include "SOUND_CONNECTED.txt"
 };
 
-const uint8_t EN_SOUND_TWO[] = {
-#include "res/en/SOUND_TWO.txt"
+const uint8_t SOUND_BT_DISCONNECTED [] = {
+#include "SOUND_DISCONNECTED.txt"
 };
 
-const uint8_t EN_SOUND_THREE[] = {
-#include "res/en/SOUND_THREE.txt"
+const uint8_t SOUND_BT_DUDU [] = {
+#include "SOUND_DUDU.txt"
 };
 
-const uint8_t EN_SOUND_FOUR[] = {
-#include "res/en/SOUND_FOUR.txt"
-};
-
-const uint8_t EN_SOUND_FIVE[] = {
-#include "res/en/SOUND_FIVE.txt"
-};
-
-const uint8_t EN_SOUND_SIX[] = {
-#include "res/en/SOUND_SIX.txt"
-};
-
-const uint8_t EN_SOUND_SEVEN [] = {
-#include "res/en/SOUND_SEVEN.txt"
-};
-
-const uint8_t EN_SOUND_EIGHT [] = {
-#include "res/en/SOUND_EIGHT.txt"
-};
-
-const uint8_t EN_SOUND_NINE [] = {
-#include "res/en/SOUND_NINE.txt"
-};
-
-const uint8_t EN_BT_PAIR_ENABLE[] = {
-#include "res/en/SOUND_PAIR_ENABLE.txt"
-};
-
-const uint8_t EN_BT_PAIRING[] = {
-#include "res/en/SOUND_PAIRING.txt"
-};
-
-const uint8_t EN_BT_PAIRING_FAIL[] = {
-#include "res/en/SOUND_PAIRING_FAIL.txt"
-};
-
-const uint8_t EN_BT_PAIRING_SUCCESS[] = {
-#include "res/en/SOUND_PAIRING_SUCCESS.txt"
-};
-
-const uint8_t EN_BT_REFUSE[] = {
-#include "res/en/SOUND_REFUSE.txt"
-};
-
-const uint8_t EN_BT_OVER[] = {
-#include "res/en/SOUND_OVER.txt"
-};
-
-const uint8_t EN_BT_ANSWER[] = {
-#include "res/en/SOUND_ANSWER.txt"
-};
-
-const uint8_t EN_BT_HUNG_UP[] = {
-#include "res/en/SOUND_HUNG_UP.txt"
-};
-
-const uint8_t EN_BT_CONNECTED [] = {
-#include "res/en/SOUND_CONNECTED.txt"
-};
-
-const uint8_t EN_BT_DIS_CONNECT [] = {
-#include "res/en/SOUND_DIS_CONNECT.txt"
-};
-
-const uint8_t EN_BT_INCOMING_CALL [] = {
-#include "res/en/SOUND_INCOMING_CALL.txt"
-};
-
-const uint8_t EN_CHARGE_PLEASE[] = {
-#include "res/en/SOUND_CHARGE_PLEASE.txt"
-};
-
-const uint8_t EN_CHARGE_FINISH[] = {
-#include "res/en/SOUND_CHARGE_FINISH.txt"
-};
-
-const uint8_t EN_LANGUAGE_SWITCH[] = {
-#include "res/en/SOUND_LANGUAGE_SWITCH.txt"
-};
-
-const uint8_t EN_BT_WARNING[] = {
-#include "res/en/SOUND_WARNING.txt"
-};
-
-const uint8_t EN_BT_ALEXA_START[] = {
-#include "res/en/SOUND_ALEXA_START.txt"
-};
-
-const uint8_t EN_BT_ALEXA_STOP[] = {
-#include "res/en/SOUND_ALEXA_STOP.txt"
-};
-
-const uint8_t EN_BT_GSOUND_MIC_OPEN[] = {
-#include "res/en/SOUND_GSOUND_MIC_OPEN.txt"
-};
-
-const uint8_t EN_BT_GSOUND_MIC_CLOSE[] = {
-#include "res/en/SOUND_GSOUND_MIC_CLOSE.txt"
-};
-
-const uint8_t EN_BT_DUDU[] = {
-#include "res/en/dudu.txt"
-};
-const uint8_t EN_BT_GSOUND_NC[] = {
-#include "res/en/SOUND_GSOUND_NC.txt"
-};
 #ifdef __INTERACTION__
-const uint8_t EN_BT_FINDME[] = {
-#include "res/en/SOUND_FINDME.txt"
+const uint8_t SOUND_BT_FINDME [] = {
+#include "SOUND_FINDME.txt"
 };
-#endif
-#endif
+#endif // INTERACTION
+
+const uint8_t SOUND_BT_GSOUND_MIC_CLOSE [] = {
+#include "SOUND_GSOUND_MIC_CLOSE.txt"
+};
+const uint8_t SOUND_BT_GSOUND_MIC_OPEN [] = {
+#include "SOUND_GSOUND_MIC_OPEN.txt"
+};
+const uint8_t SOUND_BT_GSOUND_NC [] = {
+#include "SOUND_GSOUND_NC.txt"
+};
+
+const uint8_t SOUND_BT_HUNG_UP [] = {
+#include "SOUND_HUNG_UP.txt"
+};
+
+const uint8_t SOUND_BT_INCOMING_CALL [] = {
+#include "SOUND_INCOMING_CALL.txt"
+};
+
+const uint8_t SOUND_LANGUAGE_SWITCH [] = {
+#include "SOUND_LANGUAGE_SWITCH.txt"
+};
+
+const uint8_t SOUND_ZERO [] = {
+#include "SOUND_ZERO.txt"
+};
+const uint8_t SOUND_ONE [] = {
+#include "SOUND_ONE.txt"
+};
+const uint8_t SOUND_TWO [] = {
+#include "SOUND_TWO.txt"
+};
+const uint8_t SOUND_THREE [] = {
+#include "SOUND_THREE.txt"
+};
+const uint8_t SOUND_FOUR [] = {
+#include "SOUND_FOUR.txt"
+};
+const uint8_t SOUND_FIVE [] = {
+#include "SOUND_FIVE.txt"
+};
+const uint8_t SOUND_SIX [] = {
+#include "SOUND_SIX.txt"
+};
+const uint8_t SOUND_SEVEN [] = {
+#include "SOUND_SEVEN.txt"
+};
+const uint8_t SOUND_EIGHT [] = {
+#include "SOUND_EIGHT.txt"
+};
+const uint8_t SOUND_NINE [] = {
+#include "SOUND_NINE.txt"
+};
+
+const uint8_t SOUND_BT_OVER [] = {
+#include "SOUND_OVER.txt"
+};
+
+const uint8_t SOUND_BT_PAIR_ENABLE [] = {
+#include "SOUND_PAIRING_ENABLED.txt"
+};
+const uint8_t SOUND_BT_PAIRING_FAIL [] = {
+#include "SOUND_PAIRING_FAILED.txt"
+};
+const uint8_t SOUND_BT_PAIRING_SUCCESS [] = {
+#include "SOUND_PAIRING_SUCCESS.txt"
+};
+const uint8_t SOUND_BT_PAIRING [] = {
+#include "SOUND_PAIRING.txt"
+};
+
+const uint8_t SOUND_POWER_OFF [] = {
+#include "SOUND_POWER_OFF.txt"
+};
+const uint8_t SOUND_POWER_ON [] = {
+#include "SOUND_POWER_ON.txt"
+};
+
+
+const uint8_t SOUND_BT_REFUSE [] = {
+#include "SOUND_REFUSE.txt"
+};
+
+const uint8_t SOUND_BT_WARNING [] = {
+#include "SOUND_WARNING.txt"
+};
+
+#endif // MEDIA_PLAYER_SUPPORT
