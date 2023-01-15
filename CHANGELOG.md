@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2023-01-15
+
+### Changed
+
+- shift volume scale so the lower end is quieter
 
 ## [0.1.1] - 2023-01-15
 
