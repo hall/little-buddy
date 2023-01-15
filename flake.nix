@@ -15,6 +15,17 @@
         let pkgs = inputs.nixpkgs.legacyPackages.${system}; in
         {
           apps = {
+            flash = inputs.utils.lib.mkApp {
+              drv = pkgs.writeShellScriptBin "tts" ''
+                # should correctly identify the pinebuds
+                id=/dev/serial/by-id/usb-wch.cn_USB_Dual_Serial_0123456789-if
+                for i in 00 02; do
+                  # use the given file or a default
+                  [ $# -eq 1 ] && bin=$1 || bin=result/little-buddy-*-''${LANGUAGE:-en}.bin
+                  ${self.packages.${system}.bestool}/bin/bestool write-image --port $id$i $bin 
+                done
+              '';
+            };
             tts = inputs.utils.lib.mkApp {
               drv = pkgs.writeShellScriptBin "tts" ''
                 LANGUAGE=$1
