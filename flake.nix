@@ -18,13 +18,42 @@
           formatter = pkgs.treefmt;
           apps = {
             flash = inputs.utils.lib.mkApp {
-              drv = pkgs.writeShellScriptBin "tts" ''
+              drv = pkgs.writeShellScriptBin "flash" ''
+                LANGUAGE=en
+
+                while [[ $# -gt 0 ]]; do
+                  case $1 in
+                    -v|--version)
+                      VERSION="$2"
+                      shift 2;;
+                    -l|--language)
+                      LANGUAGE="$2"
+                      shift 2;;
+                    -*)
+                      echo "unknown option: $1"
+                      echo "usage: $0 -- [-v <version>] [-l <language>]"
+                      echo "       $0 <path/to/firmware.bin>"
+                      exit 1;;
+                    *)
+                      BIN="$1"
+                      shift;;
+                  esac
+                done
+
+                if [ ! -n "$VERSION" ]; then
+                  VERSION=$(curl -s https://api.github.com/repos/hall/little-buddy/releases/latest | jq -r '.name')
+                fi
+                if [ ! -n "$BIN" ]; then
+                  BIN=$(mktemp /tmp/firmware-XXXXXX.bin)
+                  trap "rm $BIN" SIGINT SIGABRT
+                  curl -sL https://github.com/hall/little-buddy/releases/download/$VERSION/little-buddy-$VERSION-$LANGUAGE.bin -o $BIN
+                fi
+
                 # should correctly identify the pinebuds
                 path=/dev/serial/by-id/usb-wch.cn_USB_Dual_Serial_0123456789-if
                 for id in 02 00; do
                   # use the given file or a default
-                  [ $# -eq 1 ] && bin=$1 || bin=result/little-buddy-*-''${LANGUAGE:-en}.bin
-                  ${self.packages.${system}.bestool}/bin/bestool write-image --port $path$id $bin 
+                  ${self.packages.${system}.bestool}/bin/bestool write-image --port $path$id $BIN 
                 done
               '';
             };

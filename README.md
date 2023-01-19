@@ -16,13 +16,13 @@ The following button actions are mapped:
 
 ## install
 
-Download the latest [release](https://github.com/hall/little-buddy/releases) then flash both earbuds with
+Flash both earbuds with
 
 ```sh
-nix run 'github:hall/little-buddy#flash' little-buddy-*.bin
+nix run 'github:hall/little-buddy#flash'
 ```
 
-> **NOTE**: if you don't want to use [nix](https://nixos.org/download.html), you can use [`bestool`](https://github.com/Ralim/bestool) directly
+> **NOTE**: append `-- -h` to view command help text; if you don't want to use [nix](https://nixos.org/download.html), you can download the latest [release](https://github.com/hall/little-buddy/releases) and use [`bestool`](https://github.com/Ralim/bestool) directly
 
 ## languages
 
@@ -31,12 +31,12 @@ The following languages of audio alerts are currently supported:
 | name      | translation | code |
 | --------- | :---------- | :--- |
 | عربى      | Arabic      | ar   |
-| বাংলা        | Bengali     | bn   |
+| বাংলা     | Bengali     | bn   |
 | Deutsche  | German      | de   |
 | English   | English     | en   |
 | Español   | Spanish     | es   |
 | Français  | French      | fr   |
-| हिंदी        | Hindi       | hi   |
+| हिंदी     | Hindi       | hi   |
 | 日本      | Japanese    | ja   |
 | Português | Portuguese  | pl   |
 | русский   | Russian     | ru   |
