@@ -41,12 +41,12 @@
                 done
 
                 if [ ! -n "$VERSION" ]; then
-                  VERSION=$(curl -s https://api.github.com/repos/hall/little-buddy/releases/latest | jq -r '.name')
+                  VERSION=$(${pkgs.curl}/bin/curl -s https://api.github.com/repos/hall/little-buddy/releases/latest | ${pkgs.jq}/bin/jq -r '.name')
                 fi
                 if [ ! -n "$BIN" ]; then
                   BIN=$(mktemp /tmp/firmware-XXXXXX.bin)
                   trap "rm $BIN" SIGINT SIGABRT
-                  curl -sL https://github.com/hall/little-buddy/releases/download/$VERSION/little-buddy-$VERSION-$LANGUAGE.bin -o $BIN
+                  ${pkgs.curl}/bin/curl -sL https://github.com/hall/little-buddy/releases/download/$VERSION/little-buddy-$VERSION-$LANGUAGE.bin -o $BIN
                 fi
 
                 # should correctly identify the pinebuds
