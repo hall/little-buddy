@@ -116,8 +116,9 @@
                 ffmpeg
                 xxd
               ];
-              buildPhase = ''
-                find ./config/res/spoken -maxdepth 1 -mindepth 1 -type d -exec sh -c 'make -j LANGUAGE=$(basename {})' \;
+              buildPhase = with pkgs; ''
+                ${findutils}/bin/find ./config/res/spoken -maxdepth 1 -mindepth 1 -type d -exec \
+                    ${bash}/bin/sh -c '${gnumake}/bin/make -j LANGUAGE=$(${coreutils}/bin/basename {})' \;
               '';
               installPhase = ''
                 version=$(cat CHANGELOG.md | grep '^## \[[0-9]' | head -1 | cut -d "[" -f2 | cut -d "]" -f1)
