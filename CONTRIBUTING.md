@@ -4,6 +4,10 @@ This project uses the [nix](https://nixos.org/download.html) package manager.
 
 > **NOTE**: until they're no longer experimental, you'll need to [enable flakes](https://nixos.wiki/wiki/Flakes#Enable_flakes)
 
+## Enable LFS
+
+**IMPORTANT:*** You must enable git LFS; otherwise, the `.a` files included in this repo will be stubs rather than the necessary binaries.
+
 ## build
 
 Enter a development environment with

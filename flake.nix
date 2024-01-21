@@ -117,6 +117,11 @@
                 xxd
               ];
               buildPhase = ''
+                if [ "$(head -c 7 ./platform/drivers/usb/usb_dev/lib/libusbdev.a)" = "version" ] ; then
+                  2>&1 echo "ERROR: Wrong binary contents; please make sure Git LFS is enabled and binaries have been pulled"
+                  exit 1
+                fi
+
                 find ./config/res/spoken -maxdepth 1 -mindepth 1 -type d -exec sh -c 'make -j LANGUAGE=$(basename {})' \;
               '';
               installPhase = ''
