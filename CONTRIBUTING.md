@@ -6,6 +6,8 @@ This project uses the [nix](https://nixos.org/download.html) package manager.
 
 ## build
 
+> **WARN**: git LFS must be enabled to resolve various `.a` binary files
+
 Enter a development environment with
 
 ```sh
