@@ -116,12 +116,13 @@
                 ffmpeg
                 xxd
               ];
-              buildPhase = ''
-                if [ "$(head -c 7 ./platform/drivers/usb/usb_dev/lib/libusbdev.a)" = "version" ] ; then
-                  2>&1 echo "ERROR: Wrong binary contents; please make sure Git LFS is enabled and binaries have been pulled"
+              postUnpack = ''
+                if [ "$(head -c 7 $(git lfs ls-files --name-only | head -1))" =! "version" ]; then
+                  echo "ERROR: run 'git lfs pull' to resolve binary files"
                   exit 1
                 fi
-
+              '';
+              buildPhase = ''
                 find ./config/res/spoken -maxdepth 1 -mindepth 1 -type d -exec sh -c 'make -j LANGUAGE=$(basename {})' \;
               '';
               installPhase = ''
