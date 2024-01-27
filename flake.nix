@@ -105,7 +105,18 @@
                 udev
               ];
             };
-            default = pkgs.stdenv.mkDerivation rec {
+            default =
+              let # exampleLfsPath is a path to a file managed by Git LFS.  We
+                  # grab this here so we can sanity-check whether the user has
+                  # gotten *any* LFS files.  We can't get this path during the
+                  # build, because git metadata has already been removed by
+                  # then.
+                  exampleLfsPath =
+                    builtins.elemAt (
+                      builtins.match "(|.*\n)([^ ]*).* merge=lfs .*" (
+                        builtins.readFile ./.gitattributes
+                      )) 1;
+              in pkgs.stdenv.mkDerivation rec {
               name = "little-buddy";
               src = ./.;
               nativeBuildInputs = with pkgs; [
@@ -117,7 +128,7 @@
                 xxd
               ];
               postUnpack = ''
-                if [ "$(head -c 7 $(git lfs ls-files --name-only | head -1))" =! "version" ]; then
+                if [ "$(head -c 7 */${exampleLfsPath})" = "version" ]; then
                   echo "ERROR: run 'git lfs pull' to resolve binary files"
                   exit 1
                 fi
