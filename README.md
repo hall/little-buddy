@@ -32,7 +32,7 @@ The following languages of audio alerts are currently supported:
 | --------- | :---------- | :--- |
 | عربى      | Arabic      | ar   |
 | বাংলা     | Bengali     | bn   |
-| Deutsche  | German      | de   |
+| Deutsch  | German      | de   |
 | English   | English     | en   |
 | Español   | Spanish     | es   |
 | Français  | French      | fr   |
